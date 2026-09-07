@@ -1,0 +1,5 @@
+# Pinned to the versions this demo suite was built and tested against.
+# pytest>=7.0 is required for the built-in `pythonpath` ini option (see
+# pytest.ini) that lets tests import from app/ without installing this
+# project as a package first.
+pytest>=7.4
