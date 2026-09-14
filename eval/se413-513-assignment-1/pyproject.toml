@@ -1,0 +1,19 @@
+[project]
+name = "se413-513-assignment-1"
+version = "0.1.0"
+description = "SE 413/513 Assignment 1 -- Course Registration System (starter code)"
+requires-python = ">=3.9"
+
+[tool.pytest.ini_options]
+# Allows tests to `import registration` directly without packaging src/.
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+# Pre-registered markers for Section 8(a). Apply them to your tests as
+# appropriate; you may register additional markers of your own if useful.
+markers = [
+    "unit: fast, isolated unit tests",
+    "positive: tests for valid / expected-success scenarios",
+    "negative: tests for invalid input / expected-failure scenarios",
+    "boundary: tests targeting boundary values identified via boundary-value analysis",
+]
