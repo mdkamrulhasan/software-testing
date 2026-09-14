@@ -1,0 +1,258 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 3}\\[4pt]
+  \large Equivalence Partitioning, Boundary-Value Analysis, and Negative Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Engineering
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \texttt{demo-testing-suite/} since Week 2, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \texttt{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 3 and, more importantly, explains \emph{why} each change exists ---
+what testing concept from the Week 3 reading it is meant to demonstrate.
+Read this alongside the reading and \texttt{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--2 was removed or rewritten. Everything below is
+\emph{additive} --- the running examples you already saw
+(\texttt{calculate\_late\_fee}, the shopping cart, discounts) are all
+still there, unchanged, and still behave the same way.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\begin{tabular}{@{}p{5.4cm}p{1.6cm}p{7.4cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\texttt{app/pricing/shipping.py} & New & The Week 3 worked example: a
+weight-based shipping-cost function with equivalence classes, boundaries,
+and a deliberate defect for you to find. \\
+\texttt{tests/pricing/test\_shipping.py} & New & A parametrized
+\texttt{pytest} suite encoding equivalence partitioning, boundary-value
+analysis, and negative testing against that function. \\
+\texttt{docs/DEMO\_GUIDE\_week03\_ep\_bva\_negative\_testing.md} & New &
+A section-by-section lecture companion (primarily for in-class use). \\
+\texttt{README.md} & Modified & Updated project layout description and
+the expected \texttt{pytest -v} output, now that Week 3's files exist. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{New App Code: \texttt{determine\_shipping\_cost()}}
+% ============================================================
+\textbf{Location:} \texttt{app/pricing/shipping.py}
+
+This is the centerpiece example for this lecture. Its specification (in
+the file's own docstring) is:
+
+\begin{quote}
+Given a package weight in kilograms, return the shipping cost: \$5.00 for
+$0 < \text{weight} \leq 1$\,kg, \$10.00 for $1 < \text{weight} \leq
+5$\,kg, and \$20.00 for $5 < \text{weight} \leq 20$\,kg. Weights of
+0\,kg or less, or above 20\,kg, are invalid and should raise a
+\texttt{ValueError}.
+\end{quote}
+
+This specification is deliberately identical in shape to the
+\texttt{determine\_shipping\_cost()} worked example walked through
+step by step in the Week 3 reading --- so you can use the reading's
+equivalence-class table and boundary table directly against this real
+file instead of against a hypothetical one.
+
+\begin{warningbox}
+\textbf{This implementation is not guaranteed to be correct.} It
+contains at least one defect placed there on purpose, at one of the
+specification's boundaries. Finding it is meant to be an exercise in
+applying boundary-value analysis yourself --- work out the boundary
+values from the specification first, predict the expected cost at each
+one, \emph{then} check what the function actually returns. This document
+intentionally does not name the exact defect; treat that as part of the
+exercise.
+\end{warningbox}
+
+There is also a second, separate issue in how the function responds to
+input of the wrong \emph{type} entirely (not just the wrong numeric
+range) --- worth investigating once you've finished with the numeric
+boundaries.
+
+% ============================================================
+\section{New Tests: \texttt{test\_shipping.py}}
+% ============================================================
+\textbf{Location:} \texttt{tests/pricing/test\_shipping.py}
+
+This file encodes the three techniques from the reading as one
+parametrized \texttt{pytest} suite, in the same order the reading
+builds them:
+
+\begin{itemize}
+\item \textbf{Equivalence partitioning:} one representative value from
+each valid class (below the first boundary, between each pair of
+boundaries, above the last valid boundary).
+\item \textbf{Boundary-value analysis:} the exact edge of every class in
+the specification, tested together with the equivalence-partitioning
+cases in one parametrized test function.
+\item \textbf{Negative testing:} two separate test functions --- one
+supplying out-of-range numeric weights and asserting a
+\texttt{ValueError}, and one supplying values of the wrong type
+entirely (\texttt{None}, a string, a list, a dictionary) and asserting
+some kind of clear error.
+\end{itemize}
+
+\begin{tipbox}
+Run the suite yourself before reading further:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pytest tests/pricing/test_shipping.py -v
+\end{lstlisting}
+One case in the output is marked \texttt{XFAIL} (``expected failure'')
+rather than \texttt{PASS} or \texttt{FAIL}. That is not a broken test ---
+it is how this codebase documents a \emph{known}, not-yet-fixed defect,
+exactly as \texttt{calculate\_late\_fee}'s negative-days bug was
+documented back in Week 1. Use the \texttt{XFAIL} line as a hint about
+\emph{where} the boundary defect lives, without reading the reason
+string just yet if you want to work it out yourself first.
+\end{tipbox}
+
+% ============================================================
+\section{New Documentation}
+% ============================================================
+\textbf{Location:} \texttt{docs/DEMO\_GUIDE\_week03\_ep\_bva\_negative\_testing.md}
+
+This is a lecture-companion document, primarily written to guide what
+gets shown and run during class, section by section. It is organized to
+follow the Week 3 reading's own structure. You are welcome to read it,
+but it is not required reading --- the reading itself and the exercise
+above are the primary material.
+
+% ============================================================
+\section{Updated: \texttt{README.md}}
+% ============================================================
+The top-level \texttt{demo-testing-suite/README.md} was updated to
+reflect the two new files above and to describe the suite's current
+expected output. If you run the full suite from the project root:
+
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+
+you should see a mix of passing tests, exactly two \texttt{XFAIL}
+results, and exactly one \texttt{FAIL} (all three explained in the
+README and the demo guide). If your output differs from that --- more
+failures, fewer passes --- something is broken and worth investigating
+or asking about; if it matches, everything is behaving as designed.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+The reading argues that equivalence partitioning gives you a small,
+representative set of inputs; boundary-value analysis tells you which
+values \emph{within} that set are most worth testing; and negative
+testing checks that the software fails gracefully on input the
+specification never anticipated. \texttt{shipping.py} and
+\texttt{test\_shipping.py} exist so you can apply all three techniques
+against a real function and a real, runnable test suite --- not just a
+diagram on a slide.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Read \texttt{app/pricing/shipping.py}'s specification (the
+docstring), and independently derive its equivalence classes and
+boundary values, the same way the reading does for its own example.
+\item Predict the expected output at every boundary value \emph{before}
+running anything.
+\item Run \texttt{pytest tests/pricing/test\_shipping.py -v} and compare
+the actual results to your predictions. Investigate any mismatch.
+\item Try at least one additional negative test of your own --- an input
+category not already covered in the file --- and reason about what the
+function \emph{should} do with it, per the reading's guidance on
+graceful failure.
+\end{enumerate}
+
+\end{document}
