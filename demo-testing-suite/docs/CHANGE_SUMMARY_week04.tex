@@ -1,0 +1,313 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 4}\\[4pt]
+  \large Test-Driven Development, Mocking, and Dependency Isolation\\[2pt]
+  \normalsize SE 413/513 --- Software Engineering
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \texttt{demo-testing-suite/} since Week 3, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \texttt{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 4 and, more importantly, explains \emph{why} each change exists ---
+what testing concept from the Week 4 reading it is meant to demonstrate.
+Read this alongside the reading and \texttt{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--3 was removed or rewritten. Everything below is
+\emph{additive} --- the running examples you already saw
+(\texttt{calculate\_late\_fee}, the shopping cart, discounts,
+\texttt{determine\_shipping\_cost}) are all still there, unchanged, and
+still behave the same way, including their two known, intentional
+\texttt{xfail}/\texttt{FAIL} results.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\begin{tabular}{@{}p{5.8cm}p{1.6cm}p{7.0cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\texttt{app/notifications/password\_reset.py} & New & A direct
+transcription of the reading's \texttt{PasswordResetService} worked
+example: a dependency-injection seam (\texttt{email\_client}) replacing
+a hard-coded \texttt{smtplib} dependency. \\
+\texttt{tests/notifications/test\_password\_reset\_service.py} & New &
+The reading's full dummy/stub/fake/spy/mock taxonomy, plus the
+``mocks that lie'' pitfall, as seven runnable \texttt{pytest} tests. \\
+\texttt{app/accounts/registration\_service.py} & New &
+\texttt{UserRegistrationService}: the first caller of
+\texttt{UserRepository} that needs isolating --- fulfills that file's
+own Week 2 docstring forward-reference to a future mocking lecture. \\
+\texttt{tests/accounts/test\_registration\_service.py} & New & Mocks
+\texttt{UserRepository} directly (via \texttt{create\_autospec}) instead
+of a real \texttt{sqlite3} connection, plus a second ``mocks that lie''
+demonstration. \\
+\texttt{docs/DEMO\_GUIDE\_week04\_tdd\_test\_doubles.md} & New & A
+section-by-section lecture companion (primarily for in-class use). \\
+\texttt{README.md} & Modified & Updated project layout description and
+the expected \texttt{pytest -v} output, now that Week 4's files exist. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Note that \texttt{tests/practice/tdd\_password\_demo.py} (the
+Red-Green-Refactor live-coding script for the reading's
+\texttt{is\_strong\_password()} example) was already added to the
+repository ahead of this reading, in anticipation of this lecture. It is
+unchanged by this update and is described here for completeness only.
+
+% ============================================================
+\section{New App Code: \texttt{PasswordResetService}}
+% ============================================================
+\textbf{Location:} \texttt{app/notifications/password\_reset.py}
+
+This file is the centerpiece worked example from the reading's
+``Dependency Isolation and Seams'' section, transcribed so it can be run
+against real code instead of a slide. It defines three things:
+
+\begin{itemize}
+\item \textbf{\texttt{EmailClient}} --- an interface with no real
+behavior. Its only job is to give \texttt{unittest.mock.create\_autospec}
+something concrete to constrain a mock to (see the Common Pitfalls
+tests, below).
+\item \textbf{\texttt{SmtpEmailClient}} --- the real, production
+implementation, wrapping \texttt{smtplib}. It is intentionally
+\emph{not} exercised by any test in this suite --- testing it for real
+would require a real mail server, which is exactly the problem
+dependency injection solves.
+\item \textbf{\texttt{PasswordResetService}} --- the class actually
+under test. Its constructor accepts \texttt{email\_client} and
+\texttt{logger} from outside instead of constructing them internally.
+\end{itemize}
+
+\begin{keyidea}
+The reading's ``before'' version --- a hard-coded
+\texttt{smtplib.SMTP(...)} call built directly inside
+\texttt{send\_reset\_email()} --- is described in this file's docstring
+but deliberately \emph{not} reproduced as runnable code. Only the
+``after'' version, with the seam already in place, actually exists here.
+This mirrors how Week 3's \texttt{shipping.py} carried only the
+specification, not a second broken copy of the function.
+\end{keyidea}
+
+% ============================================================
+\section{New Tests: The Test Double Taxonomy}
+% ============================================================
+\textbf{Location:} \texttt{tests/notifications/test\_password\_reset\_service.py}
+
+This file encodes the reading's five test doubles as seven runnable
+tests, in the same order the reading introduces them:
+
+\begin{itemize}
+\item \textbf{Dummy} --- \texttt{DummyLogger}, poisoned so any
+accidental use raises immediately. \texttt{send\_reset\_email()} never
+calls \texttt{logger} at all, so a correct test never triggers it.
+\item \textbf{Stub} --- \texttt{StubEmailClient}, a canned answer with
+no assertion made about how it was called.
+\item \textbf{Fake} --- \texttt{FakeEmailClient}, verified via
+\textbf{state verification} (inspecting \texttt{sent\_emails}
+afterward).
+\item \textbf{Spy} --- \texttt{SpyEmailClient}, which records calls for
+the test to inspect.
+\item \textbf{Mock} --- a bare \texttt{MagicMock()}, verified via
+\textbf{behavior verification}
+(\texttt{assert\_called\_once\_with(...)}).
+\end{itemize}
+
+The file closes with two tests demonstrating the reading's ``Mocks that
+lie'' pitfall directly: a bare \texttt{MagicMock()} silently accepts a
+typo'd method name (\texttt{sedn} instead of \texttt{send}), while
+\texttt{create\_autospec(EmailClient, instance=True)} raises an
+\texttt{AttributeError} on the identical typo.
+
+\begin{tipbox}
+Run the suite yourself:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pytest tests/notifications/test_password_reset_service.py -v
+\end{lstlisting}
+All seven tests pass. Unlike Weeks 1 and 3, there is no deliberate bug
+to find in this file --- the teaching payload is in reading the five
+doubles side by side, not in a failure.
+\end{tipbox}
+
+% ============================================================
+\section{New App Code and Tests: Mocking \texttt{UserRepository}}
+% ============================================================
+\textbf{Locations:} \texttt{app/accounts/registration\_service.py},
+\texttt{tests/accounts/test\_registration\_service.py}
+
+\texttt{app/accounts/user\_repository.py}'s docstring has said, since
+Week 2: ``\emph{A mocking lecture can mock UserRepository instead of
+sqlite3 itself.}'' Until now, nothing in the codebase actually called
+\texttt{UserRepository}, so that sentence had nothing to point at.
+\texttt{UserRegistrationService} is that first caller: it accepts a
+\texttt{user\_repository} and an \texttt{email\_client} via constructor
+injection, registers a new user through the repository, and welcomes
+them through the email client.
+
+Its test file never touches \texttt{sqlite3}. Instead,
+\texttt{create\_autospec(UserRepository, instance=True)} replaces the
+whole dependency, and the tests check both outcomes (a returned user id,
+a rejected duplicate) and interactions (the welcome email's exact
+arguments, or that no email is sent on rejection). A third test repeats
+the ``mocks that lie'' point from the notifications suite, this time
+against \texttt{UserRepository}'s own interface.
+
+\begin{tipbox}
+Contrast this with \texttt{tests/accounts/test\_user\_repository.py},
+which still exercises a real \texttt{:memory:} SQLite connection ---
+that file tests \texttt{UserRepository} itself, while this new file
+tests a \emph{caller} of \texttt{UserRepository} in isolation from it.
+\begin{lstlisting}[style=shellstyle]
+pytest tests/accounts/test_registration_service.py -v
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{New Documentation}
+% ============================================================
+\textbf{Location:} \texttt{docs/DEMO\_GUIDE\_week04\_tdd\_test\_doubles.md}
+
+This is a lecture-companion document, primarily written to guide what
+gets shown and run during class, section by section, following the
+Week 4 reading's own structure --- including how to live-code
+\texttt{tests/practice/tdd\_password\_demo.py}'s Red-Green-Refactor
+cycles. You are welcome to read it, but it is not required reading ---
+the reading itself is the primary material.
+
+% ============================================================
+\section{Updated: \texttt{README.md}}
+% ============================================================
+The top-level \texttt{demo-testing-suite/README.md} was updated to
+reflect the four new files above and to describe the suite's current
+expected output. If you run the full suite from the project root:
+
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+
+you should now see \textbf{43 passed, 2 xfailed, 1 failed} --- ten more
+passing tests than Week 3's baseline, and the same two \texttt{xfail}
+results and one \texttt{FAIL} as before, all unrelated to this week's
+additions.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+The reading argues that TDD's real value is design pressure: writing a
+test first surfaces hidden dependencies before they calcify. Dependency
+injection turns a hidden dependency into a seam, and the dummy/stub/
+fake/spy/mock vocabulary gives a precise way to choose what belongs on
+the other side of that seam during a test.
+\texttt{app/notifications/password\_reset.py} and
+\texttt{app/accounts/registration\_service.py} exist so you can see both
+halves of that argument against real, running code: a seam introduced
+where a hard-coded dependency used to be, and all five kinds of double
+filling it in five different tests.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Read \texttt{app/notifications/password\_reset.py}'s docstring and
+identify, in your own words, why the reading's ``before'' version would
+be hard to unit test --- before looking at how the ``after'' version
+solves it.
+\item Run \texttt{pytest tests/notifications/test\_password\_reset\_service.py -v}
+and, for each of the five doubles, say out loud which school (classical
+or mockist) it belongs to and why.
+\item Run \texttt{pytest tests/accounts/test\_registration\_service.py -v}
+and explain why this file needs no real database at all, in contrast to
+\texttt{tests/accounts/test\_user\_repository.py}.
+\item Try Exercise 2 from the reading (\texttt{SessionManager} /
+\texttt{time.time()}) on paper: identify the hard-coded dependency and
+sketch the constructor-injected version, the same way this week's app
+code did for \texttt{PasswordResetService} and
+\texttt{UserRegistrationService}.
+\end{enumerate}
+
+\end{document}

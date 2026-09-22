@@ -11,6 +11,8 @@ Companion pieces:
 - `docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` — the same, for
   Week 3 (Equivalence Partitioning, Boundary-Value Analysis, and
   Negative Testing).
+- `docs/DEMO_GUIDE_week04_tdd_test_doubles.md` — the same, for Week 4
+  (Test-Driven Development, Mocking, and Dependency Isolation).
 - `final_project/README.md` — how the final project is meant to build
   on everything here.
 
@@ -39,12 +41,25 @@ app/                    The "system under test" — grows one feature at a time
   accounts/user_repository.py Week 2 — built for later
                                lectures (mocking, integration testing)
                                and the final project to extend
+  accounts/registration_service.py Week 4 — mocks UserRepository
+                               instead of sqlite3, per that file's own
+                               Week 2 docstring
+  notifications/password_reset.py  Week 4 (TDD / mocking / dependency
+                               isolation) — dummy, stub, fake, spy, mock
 
 tests/                  The "real" growing suite — mirrors app/'s layout
   conftest.py               Project-wide fixtures (empty so far — see its docstring)
   legacy/                   Week 1's unittest-style tests, kept for the "Revisited" slide
-  billing/  pricing/  reports/  payments/  accounts/
+  billing/  pricing/  reports/  payments/  accounts/  notifications/
     pricing/test_shipping.py     Week 3's EP/BVA/negative-testing suite
+    notifications/test_password_reset_service.py  Week 4's test-double
+      taxonomy suite (dummy/stub/fake/spy/mock)
+    accounts/test_registration_service.py          Week 4's
+      UserRepository-mocking suite
+
+  practice/                 In-class live-coding scripts — not named
+                             `test_*.py`, so plain `pytest` skips them
+    tdd_password_demo.py      Week 4's Red-Green-Refactor script
 
 demos/                  Deliberately isolated teaching examples — NOT
                         swept into a plain `pytest` run (see pytest.ini)
@@ -55,6 +70,7 @@ demos/                  Deliberately isolated teaching examples — NOT
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
   DEMO_GUIDE_week03_ep_bva_negative_testing.md Week 3, section-by-section
+  DEMO_GUIDE_week04_tdd_test_doubles.md        Week 4, section-by-section
 
 final_project/          Scaffold + a stated working assumption — read
                         before assigning
@@ -71,7 +87,7 @@ pytest tests/billing            # just one subpackage
 pytest demos/scope_pitfall -v   # a demo folder, run explicitly (not part of the main suite)
 ```
 
-Expect a full run of `pytest -v` to report **33 passed, 2 xfailed, 1
+Expect a full run of `pytest -v` to report **43 passed, 2 xfailed, 1
 failed**:
 - `XFAIL` — `test_calculate_late_fee[-4-0.0]` in
   `tests/billing/test_late_fees.py` (Week 1's negative-days bug).
@@ -81,26 +97,29 @@ failed**:
   (the same Week 1 bug, documented the unittest way; this one is swept
   into the default run since `tests/legacy` is under `testpaths`).
 
-All three are intentional and explained where they occur — see
-`docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` for the full
-walkthrough.
+All three are intentional, unchanged since Week 3, and explained where
+they occur — see `docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` for
+the full walkthrough. Week 4 is purely additive: its ten new tests (in
+`tests/notifications/` and `tests/accounts/test_registration_service.py`)
+all pass — see `docs/DEMO_GUIDE_week04_tdd_test_doubles.md`.
 
-## Extending this for the *next* lecture (TDD and Test Doubles)
+## Extending this for the *next* lecture
 
-1. If the next lecture needs a new function to build test-first, add it
-   under `app/<some_subpackage>/`, the same way Week 3 added
-   `shipping.py`: one function or small class, one clear docstring, one
-   "why this exists" note if it's not obvious.
+1. If the next lecture needs a new function or class to build test-first
+   or to isolate with a double, add it under `app/<some_subpackage>/`,
+   the same way Week 3 added `shipping.py` and Week 4 added
+   `notifications/password_reset.py` and
+   `accounts/registration_service.py`. Only create a new top-level
+   `app/` subpackage if the new feature genuinely doesn't fit under
+   billing/pricing/reports/payments/accounts/notifications.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
-   Only create a new top-level `app/` subpackage if the new feature
-   genuinely doesn't fit under billing/pricing/reports/payments/accounts.
 3. If the lecture needs a dedicated, isolated illustration (like Week
    2's `scope_pitfall/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` as a
-   starting template for the new lecture's guide — same shape, new
-   section names and file paths.
+4. Copy `docs/DEMO_GUIDE_week04_tdd_test_doubles.md` as a starting
+   template for the new lecture's guide — same shape, new section names
+   and file paths.
 
 ## Extending this for the final project
 
