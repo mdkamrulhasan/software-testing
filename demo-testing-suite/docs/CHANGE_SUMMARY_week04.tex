@@ -107,12 +107,20 @@ still behave the same way, including their two known, intentional
 \textbf{File} & \textbf{Status} & \textbf{Purpose} \\
 \midrule
 \texttt{app/notifications/password\_reset.py} & New & A direct
-transcription of the reading's \texttt{PasswordResetService} worked
-example: a dependency-injection seam (\texttt{email\_client}) replacing
-a hard-coded \texttt{smtplib} dependency. \\
+transcription of the reading's \texttt{PasswordResetService} /
+\texttt{smtplib} worked example from ``Dependency Isolation and
+Seams'': a dependency-injection seam (\texttt{email\_client}) replacing
+a hard-coded dependency. \\
 \texttt{tests/notifications/test\_password\_reset\_service.py} & New &
-The reading's full dummy/stub/fake/spy/mock taxonomy, plus the
-``mocks that lie'' pitfall, as seven runnable \texttt{pytest} tests. \\
+One test proving the injected seam works, plus the reading's ``mocks
+that lie'' pitfall, as three runnable \texttt{pytest} tests. \\
+\texttt{app/orders/order\_service.py} & New & A direct transcription of
+the reading's separate ``Test Double Taxonomy'' worked example: an
+order-placement flow with three collaborators (payment, database,
+email). \\
+\texttt{tests/orders/test\_order\_service.py} & New & The reading's full
+dummy/stub/fake/spy/mock taxonomy, as six runnable \texttt{pytest}
+tests, one per collaborator scenario the reading walks through. \\
 \texttt{app/accounts/registration\_service.py} & New &
 \texttt{UserRegistrationService}: the first caller of
 \texttt{UserRepository} that needs isolating --- fulfills that file's
@@ -128,6 +136,16 @@ the expected \texttt{pytest -v} output, now that Week 4's files exist. \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\begin{keyidea}
+The reading updated its ``Test Double Taxonomy'' section after this
+codebase's first Week 4 pass, switching from illustrating all five
+doubles against \texttt{PasswordResetService} to a separate
+order-placement example. This revision follows that update: the seam
+worked example (\texttt{password\_reset.py}) and the taxonomy worked
+example (\texttt{order\_service.py}) are now two distinct files, matching
+the reading's own two distinct sections.
+\end{keyidea}
 
 Note that \texttt{tests/practice/tdd\_password\_demo.py} (the
 Red-Green-Refactor live-coding script for the reading's
@@ -170,44 +188,74 @@ specification, not a second broken copy of the function.
 \end{keyidea}
 
 % ============================================================
-\section{New Tests: The Test Double Taxonomy}
+\section{New Tests: Proving the Seam Works}
 % ============================================================
 \textbf{Location:} \texttt{tests/notifications/test\_password\_reset\_service.py}
 
-This file encodes the reading's five test doubles as seven runnable
-tests, in the same order the reading introduces them:
+Since the reading's Test Double Taxonomy no longer uses
+\texttt{PasswordResetService}, this file keeps only what the
+``Dependency Isolation and Seams'' section itself calls for: one test
+proving the injected \texttt{email\_client} seam works with ``any object
+that has a \texttt{.send(to, message)} method,'' exactly as the reading
+describes.
+
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pytest tests/notifications/test_password_reset_service.py::test_send_reset_email_uses_the_injected_client -v
+\end{lstlisting}
+
+The file also carries the reading's ``Mocks that lie'' pitfall (Common
+Pitfalls, below), since \texttt{EmailClient} --- defined in
+\texttt{password\_reset.py} --- is a convenient real interface to
+demonstrate it against.
+
+% ============================================================
+\section{New App Code and Tests: The Test Double Taxonomy}
+% ============================================================
+\textbf{Locations:} \texttt{app/orders/order\_service.py},
+\texttt{tests/orders/test\_order\_service.py}
+
+The reading illustrates all five doubles with, in its own words, ``a
+single running example: an order\_service that, when placing an order,
+normally has to interact with three external collaborators --- a
+payment service, a database, and an email service.''
+\texttt{order\_service.py} transcribes that example's three functions
+verbatim: \texttt{calculate\_total(price, logger)},
+\texttt{place\_order(payment\_service)}, and
+\texttt{register\_user(email\_service)}.
+\texttt{test\_order\_service.py} encodes all five doubles as six
+runnable tests, in the reading's own order:
 
 \begin{itemize}
-\item \textbf{Dummy} --- \texttt{DummyLogger}, poisoned so any
-accidental use raises immediately. \texttt{send\_reset\_email()} never
-calls \texttt{logger} at all, so a correct test never triggers it.
-\item \textbf{Stub} --- \texttt{StubEmailClient}, a canned answer with
-no assertion made about how it was called.
-\item \textbf{Fake} --- \texttt{FakeEmailClient}, verified via
-\textbf{state verification} (inspecting \texttt{sent\_emails}
-afterward).
-\item \textbf{Spy} --- \texttt{SpyEmailClient}, which records calls for
-the test to inspect.
-\item \textbf{Mock} --- a bare \texttt{MagicMock()}, verified via
-\textbf{behavior verification}
-(\texttt{assert\_called\_once\_with(...)}).
+\item \textbf{Dummy} --- a plain \texttt{DummyLogger} against
+\texttt{calculate\_total()}, plus \texttt{PoisonedDummyLogger} for the
+reading's second Dummy tip box (any accidental use raises immediately).
+\item \textbf{Stub} --- \texttt{PaymentStub}, feeding
+\texttt{place\_order()}; no assertion is made about how
+\texttt{process\_payment()} was called.
+\item \textbf{Fake} --- \texttt{FakeDatabase}, an in-memory dictionary,
+verified via \textbf{state verification}
+(\texttt{fake\_db.get\_user(...)} after the fact).
+\item \textbf{Spy} --- \texttt{EmailSpy}, feeding
+\texttt{register\_user()}; records \texttt{sent\_to} for the test to
+inspect afterward.
+\item \textbf{Mock} --- a bare \texttt{Mock()}, feeding
+\texttt{place\_order()} again, verified via \textbf{behavior
+verification} (\texttt{assert\_called\_once\_with(100)}).
 \end{itemize}
-
-The file closes with two tests demonstrating the reading's ``Mocks that
-lie'' pitfall directly: a bare \texttt{MagicMock()} silently accepts a
-typo'd method name (\texttt{sedn} instead of \texttt{send}), while
-\texttt{create\_autospec(EmailClient, instance=True)} raises an
-\texttt{AttributeError} on the identical typo.
 
 \begin{tipbox}
 Run the suite yourself:
 \begin{lstlisting}[style=shellstyle]
 cd demo-testing-suite
-pytest tests/notifications/test_password_reset_service.py -v
+pytest tests/orders/test_order_service.py -v
 \end{lstlisting}
-All seven tests pass. Unlike Weeks 1 and 3, there is no deliberate bug
-to find in this file --- the teaching payload is in reading the five
-doubles side by side, not in a failure.
+All six tests pass. Unlike Weeks 1 and 3, there is no deliberate bug to
+find in this file --- the teaching payload is in reading the five
+doubles side by side, not in a failure. Notice that Stub and Mock both
+drive the \emph{same} \texttt{place\_order()} function; only what the
+test checks afterward differs --- the reading's own way of distinguishing
+the two.
 \end{tipbox}
 
 % ============================================================
@@ -259,8 +307,9 @@ the reading itself is the primary material.
 \section{Updated: \texttt{README.md}}
 % ============================================================
 The top-level \texttt{demo-testing-suite/README.md} was updated to
-reflect the four new files above and to describe the suite's current
-expected output. If you run the full suite from the project root:
+reflect the six new app/test files above and to describe the suite's
+current expected output. If you run the full suite from the project
+root:
 
 \begin{lstlisting}[style=shellstyle]
 cd demo-testing-suite
@@ -268,10 +317,10 @@ pip install -r requirements.txt
 pytest -v
 \end{lstlisting}
 
-you should now see \textbf{43 passed, 2 xfailed, 1 failed} --- ten more
-passing tests than Week 3's baseline, and the same two \texttt{xfail}
-results and one \texttt{FAIL} as before, all unrelated to this week's
-additions.
+you should now see \textbf{45 passed, 2 xfailed, 1 failed} --- twelve
+more passing tests than Week 3's baseline, and the same two
+\texttt{xfail} results and one \texttt{FAIL} as before, all unrelated to
+this week's additions.
 
 % ============================================================
 \section{How This Connects to the Reading}
@@ -282,11 +331,13 @@ test first surfaces hidden dependencies before they calcify. Dependency
 injection turns a hidden dependency into a seam, and the dummy/stub/
 fake/spy/mock vocabulary gives a precise way to choose what belongs on
 the other side of that seam during a test.
-\texttt{app/notifications/password\_reset.py} and
-\texttt{app/accounts/registration\_service.py} exist so you can see both
-halves of that argument against real, running code: a seam introduced
-where a hard-coded dependency used to be, and all five kinds of double
-filling it in five different tests.
+\texttt{app/notifications/password\_reset.py},
+\texttt{app/orders/order\_service.py}, and
+\texttt{app/accounts/registration\_service.py} exist so you can see all
+three pieces of that argument against real, running code: a seam
+introduced where a hard-coded dependency used to be, all five kinds of
+double filling seams in five different tests, and a real caller mocked
+in isolation from its dependency.
 \end{keyidea}
 
 % ============================================================
@@ -297,9 +348,9 @@ filling it in five different tests.
 identify, in your own words, why the reading's ``before'' version would
 be hard to unit test --- before looking at how the ``after'' version
 solves it.
-\item Run \texttt{pytest tests/notifications/test\_password\_reset\_service.py -v}
-and, for each of the five doubles, say out loud which school (classical
-or mockist) it belongs to and why.
+\item Run \texttt{pytest tests/orders/test\_order\_service.py -v} and,
+for each of the five doubles, say out loud which school (classical or
+mockist) it belongs to and why.
 \item Run \texttt{pytest tests/accounts/test\_registration\_service.py -v}
 and explain why this file needs no real database at all, in contrast to
 \texttt{tests/accounts/test\_user\_repository.py}.

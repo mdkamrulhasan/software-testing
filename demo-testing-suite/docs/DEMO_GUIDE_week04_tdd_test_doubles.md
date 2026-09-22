@@ -13,7 +13,7 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-You should see **43 passed, 2 xfailed, 1 failed**:
+You should see **45 passed, 2 xfailed, 1 failed**:
 - `XFAIL` — `tests/billing/test_late_fees.py::test_calculate_late_fee[-4-0.0]`
   (Lecture 1's negative-days bug, unchanged).
 - `XFAIL` — `tests/pricing/test_shipping.py::test_valid_weights[5.0-10.0]`
@@ -80,31 +80,51 @@ Point at `EmailClient`: an interface with no real behavior, whose only
 job is to give `create_autospec` something to constrain a mock to later
 in the lecture (see Common Pitfalls, below).
 
-## The Test Double Taxonomy
-
-**File:** `tests/notifications/test_password_reset_service.py`
-
-Walk the five doubles in the file's own order — it mirrors the
-reading's section order exactly:
-
-1. **Dummy** — `DummyLogger`, poisoned so any accidental use raises
-   immediately. Point out that `send_reset_email()` never calls
-   `logger` at all, so a *correct* test never triggers it.
-2. **Stub** — `StubEmailClient`. Emphasize what the test does *not* do:
-   no assertion is made about `send()` being called.
-3. **Fake** — `FakeEmailClient`. This is **state verification**: the
-   test inspects `email_client.sent_emails` after the fact.
-4. **Spy** — `SpyEmailClient`. Note in the reading's own words how close
-   this is to the fake — the difference is intent, not mechanics.
-5. **Mock** — a bare `MagicMock()`, verified with
-   `assert_called_once_with(...)`. This is **behavior verification**:
-   the assertion is against the mock itself, not any resulting state.
-
+Run the one seam test now, to show the constructor-injected
+`email_client` actually working end to end before moving on to the
+taxonomy:
 ```bash
-pytest tests/notifications/test_password_reset_service.py -v
+pytest tests/notifications/test_password_reset_service.py::test_send_reset_email_uses_the_injected_client -v
 ```
 
-All seven tests in this file pass — there is no deliberate bug to find
+## The Test Double Taxonomy
+
+**Files:** `app/orders/order_service.py`,
+`tests/orders/test_order_service.py`
+
+The reading switches examples for this section — "a single running
+example: an order_service that ... has to interact with three external
+collaborators: a payment service, a database, and an email service."
+`app/orders/order_service.py` transcribes that example's three
+functions (`calculate_total`, `place_order`, `register_user`) verbatim;
+`tests/orders/test_order_service.py` walks the five doubles in the
+reading's own order:
+
+1. **Dummy** — `DummyLogger` (plain, unused) against
+   `calculate_total()`, then `PoisonedDummyLogger` for the reading's
+   second Dummy tip box — any accidental use raises immediately.
+2. **Stub** — `PaymentStub`, feeding `place_order()`. Emphasize what the
+   test does *not* do: no assertion is made about how
+   `process_payment()` was called.
+3. **Fake** — `FakeDatabase`, an in-memory dict standing in for a real
+   database. This is **state verification**: the test inspects
+   `fake_db.get_user(...)` after the fact.
+4. **Spy** — `EmailSpy`, feeding `register_user()`. Records
+   `sent_to` for the test to inspect afterward.
+5. **Mock** — a bare `Mock()`, feeding `place_order()` again, verified
+   with `assert_called_once_with(100)`. This is **behavior
+   verification**: the assertion is against the mock itself, not any
+   resulting state. Point out that Stub and Mock both drive the *same*
+   `place_order()` function — the only difference is what the test
+   checks afterward, which is exactly the reading's "handy way to
+   remember the five" tip box (stub controls what your code *receives*;
+   mock verifies *how* it interacted).
+
+```bash
+pytest tests/orders/test_order_service.py -v
+```
+
+All six tests in this file pass — there is no deliberate bug to find
 this lecture (Weeks 1 and 3 already carry the running ones). The
 teaching payload here is in reading the five doubles side by side, not
 in a failure.
@@ -132,10 +152,10 @@ is testing `UserRepository` itself, not one of its callers.
 
 ## State Verification vs. Behavior Verification / Classical vs. Mockist Schools
 
-No new file — discussion, using `test_reset_email_is_recorded_by_the_fake`
-(state) and `test_email_client_called_with_correct_message` (behavior)
-from the notifications test file as the two concrete anchors. Ask: which
-school does each test above belong to?
+No new file — discussion, using `test_fake_database_stores_and_retrieves_a_user`
+(state) and `test_place_order_calls_process_payment_with_the_order_total`
+(behavior) from `tests/orders/test_order_service.py` as the two concrete
+anchors. Ask: which school does each test above belong to?
 
 ## Common Pitfalls
 
@@ -148,8 +168,8 @@ Live-demo "mocks that lie":
 pytest tests/notifications/test_password_reset_service.py::test_bare_mock_lets_a_typoed_method_through_silently -v
 pytest tests/notifications/test_password_reset_service.py::test_autospec_mock_catches_the_same_typo -v
 ```
-The first test *passes* precisely because a bare `MagicMock()` accepts
-any attribute name, typo included — that is the pitfall, not a test
+The first test *passes* precisely because a bare `Mock()` accepts any
+attribute name, typo included — that is the pitfall, not a test
 failure. The second test shows `create_autospec(EmailClient, ...)`
 catching the identical typo with an `AttributeError`. The accounts test
 file repeats the same point against `UserRepository`, tying it back to
@@ -178,7 +198,7 @@ No code — close with the seven takeaways from the reading.
 ## After class
 
 Confirm `pytest -v` from the project root is back to the expected
-**43 passed, 2 xfailed, 1 failed** baseline. If Cycles 2–4 of
+**45 passed, 2 xfailed, 1 failed** baseline. If Cycles 2–4 of
 `tdd_password_demo.py` were uncommented live during class, they are not
 collected by a plain `pytest` run regardless (the file isn't named
 `test_*.py`), so there is nothing to revert there — but consider
@@ -188,10 +208,11 @@ re-commenting them anyway so the file is ready to demo fresh next time.
 
 1. If the next lecture needs a new function or class to build test-first
    or to isolate with a double, add it under `app/<some_subpackage>/`,
-   the same way this lecture added `app/notifications/password_reset.py`
-   and `app/accounts/registration_service.py`. Only create a new
-   top-level `app/` subpackage if the new feature genuinely doesn't fit
-   under billing/pricing/reports/payments/accounts/notifications.
+   the same way this lecture added `app/notifications/password_reset.py`,
+   `app/orders/order_service.py`, and
+   `app/accounts/registration_service.py`. Only create a new top-level
+   `app/` subpackage if the new feature genuinely doesn't fit under
+   billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration, add it under
    `demos/<short_topic_name>/` and keep it out of `tests/` so a plain

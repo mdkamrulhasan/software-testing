@@ -44,15 +44,19 @@ app/                    The "system under test" — grows one feature at a time
   accounts/registration_service.py Week 4 — mocks UserRepository
                                instead of sqlite3, per that file's own
                                Week 2 docstring
-  notifications/password_reset.py  Week 4 (TDD / mocking / dependency
-                               isolation) — dummy, stub, fake, spy, mock
+  notifications/password_reset.py  Week 4 — "Dependency Isolation and
+                               Seams" worked example (the DI seam itself)
+  orders/order_service.py          Week 4 — "Test Double Taxonomy"
+                               worked example: dummy, stub, fake, spy, mock
 
 tests/                  The "real" growing suite — mirrors app/'s layout
   conftest.py               Project-wide fixtures (empty so far — see its docstring)
   legacy/                   Week 1's unittest-style tests, kept for the "Revisited" slide
-  billing/  pricing/  reports/  payments/  accounts/  notifications/
+  billing/  pricing/  reports/  payments/  accounts/  notifications/  orders/
     pricing/test_shipping.py     Week 3's EP/BVA/negative-testing suite
-    notifications/test_password_reset_service.py  Week 4's test-double
+    notifications/test_password_reset_service.py  Week 4's DI-seam +
+      "mocks that lie" tests
+    orders/test_order_service.py                   Week 4's test-double
       taxonomy suite (dummy/stub/fake/spy/mock)
     accounts/test_registration_service.py          Week 4's
       UserRepository-mocking suite
@@ -87,7 +91,7 @@ pytest tests/billing            # just one subpackage
 pytest demos/scope_pitfall -v   # a demo folder, run explicitly (not part of the main suite)
 ```
 
-Expect a full run of `pytest -v` to report **43 passed, 2 xfailed, 1
+Expect a full run of `pytest -v` to report **45 passed, 2 xfailed, 1
 failed**:
 - `XFAIL` — `test_calculate_late_fee[-4-0.0]` in
   `tests/billing/test_late_fees.py` (Week 1's negative-days bug).
@@ -99,19 +103,20 @@ failed**:
 
 All three are intentional, unchanged since Week 3, and explained where
 they occur — see `docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` for
-the full walkthrough. Week 4 is purely additive: its ten new tests (in
-`tests/notifications/` and `tests/accounts/test_registration_service.py`)
-all pass — see `docs/DEMO_GUIDE_week04_tdd_test_doubles.md`.
+the full walkthrough. Week 4 is purely additive: its twelve new tests
+(in `tests/notifications/`, `tests/orders/`, and
+`tests/accounts/test_registration_service.py`) all pass — see
+`docs/DEMO_GUIDE_week04_tdd_test_doubles.md`.
 
 ## Extending this for the *next* lecture
 
 1. If the next lecture needs a new function or class to build test-first
    or to isolate with a double, add it under `app/<some_subpackage>/`,
    the same way Week 3 added `shipping.py` and Week 4 added
-   `notifications/password_reset.py` and
+   `notifications/password_reset.py`, `orders/order_service.py`, and
    `accounts/registration_service.py`. Only create a new top-level
    `app/` subpackage if the new feature genuinely doesn't fit under
-   billing/pricing/reports/payments/accounts/notifications.
+   billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration (like Week
    2's `scope_pitfall/`), add it under `demos/<short_topic_name>/` and

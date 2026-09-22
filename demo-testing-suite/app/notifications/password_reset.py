@@ -1,18 +1,23 @@
 """Password-reset emails, with a seam for the email transport.
 
-This is the running example from the Week 4 reading (Test-Driven
-Development, Mocking, and Dependency Isolation), transcribed here so
-its dependency-injection and test-double examples can be run against
-real code instead of just a slide -- the same way Week 3's
-app/pricing/shipping.py let students run EP/BVA against a real file.
+This is the running example from the Week 4 reading's "Dependency
+Isolation and Seams" section, transcribed here so its
+dependency-injection example can be run against real code instead of
+just a slide -- the same way Week 3's app/pricing/shipping.py let
+students run EP/BVA against a real file.
 
 The reading's "before" version constructs its own smtplib connection
 directly inside send_reset_email(): a hard-coded dependency that makes
 the method untestable without a real (or realistic fake) mail server.
 That version is intentionally not reproduced here as runnable code --
-only PasswordResetService, the "after" version, is. See
-tests/notifications/test_password_reset_service.py for Exercise-2-style
-practice identifying a hard-coded dependency elsewhere.
+only PasswordResetService, the "after" version, is.
+
+The reading's separate "Test Double Taxonomy" section illustrates the
+five doubles with a different running example (an order_service) -- see
+app/orders/order_service.py and tests/orders/test_order_service.py for
+that. This file's own tests
+(tests/notifications/test_password_reset_service.py) stick to proving
+the `email_client` seam works and to the "Mocks that lie" pitfall.
 """
 
 
@@ -55,10 +60,10 @@ class PasswordResetService:
     """Builds a password-reset email and hands it to an injected email client.
 
     `email_client` is the seam: production code supplies a real
-    SmtpEmailClient; tests supply any of the five test doubles exercised
-    in tests/notifications/test_password_reset_service.py. `logger` is
-    accepted but never called by send_reset_email -- see that file's
-    Dummy tests for why that matters.
+    SmtpEmailClient; a test can supply any object with a
+    `.send(to, message)` method -- see
+    tests/notifications/test_password_reset_service.py. `logger` is
+    accepted but never called by send_reset_email.
     """
 
     def __init__(self, email_client, logger):
