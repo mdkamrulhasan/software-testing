@@ -13,6 +13,11 @@ Companion pieces:
   Negative Testing).
 - `docs/DEMO_GUIDE_week04_tdd_test_doubles.md` — the same, for Week 4
   (Test-Driven Development, Mocking, and Dependency Isolation).
+- `docs/DEMO_GUIDE_week05_mocking_coverage.md` — the same, for Week 5
+  (Mock vs. MagicMock; Control-Flow Graphs and Statement, Branch, and
+  Path Coverage).
+- `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
+  summaries of what changed in this codebase and why.
 - `final_project/README.md` — how the final project is meant to build
   on everything here.
 
@@ -36,8 +41,11 @@ app/                    The "system under test" — grows one feature at a time
   pricing/discounts.py       Week 2
   pricing/cart.py            Week 2
   pricing/shipping.py        Week 3 (EP / BVA / negative testing)
+  pricing/membership.py      Week 5 — statement vs. branch coverage example
   reports/report_writer.py   Week 2
   payments/api_client.py     Week 2
+  payments/transactions.py   Week 5 — control-flow-graph examples
+                               (classify_transaction, contains_negative)
   accounts/user_repository.py Week 2 — built for later
                                lectures (mocking, integration testing)
                                and the final project to extend
@@ -48,6 +56,9 @@ app/                    The "system under test" — grows one feature at a time
                                Seams" worked example (the DI seam itself)
   orders/order_service.py          Week 4 — "Test Double Taxonomy"
                                worked example: dummy, stub, fake, spy, mock
+  accounts/user_lookup.py          Week 5 — Mock vs. MagicMock worked
+                               examples: len, indexing, `in`, iteration,
+                               `with`, a DB cursor
 
 tests/                  The "real" growing suite — mirrors app/'s layout
   conftest.py               Project-wide fixtures (empty so far — see its docstring)
@@ -60,6 +71,11 @@ tests/                  The "real" growing suite — mirrors app/'s layout
       taxonomy suite (dummy/stub/fake/spy/mock)
     accounts/test_registration_service.py          Week 4's
       UserRepository-mocking suite
+    accounts/test_user_lookup.py                   Week 5's MagicMock suite
+    payments/test_transactions.py                  Week 5's CFG / path /
+      basis-path suite
+    pricing/test_membership.py                     Week 5's statement-vs-
+      branch coverage pair
 
   practice/                 In-class live-coding scripts — not named
                              `test_*.py`, so plain `pytest` skips them
@@ -70,11 +86,16 @@ demos/                  Deliberately isolated teaching examples — NOT
   scope_pitfall/            The flaky-test pitfall, run on its own
   module_scope_db/          The scope="module" contrast case
   conftest_hierarchy/       An on-disk copy of the "conftest.py Hierarchy" slide's diagram
+  coverage_gaps/            Week 5: deliberately under-tested code whose
+                             pytest-cov reports reproduce the reading
+                             (`2->4` branch gap; a "goto fail" analogue)
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
   DEMO_GUIDE_week03_ep_bva_negative_testing.md Week 3, section-by-section
   DEMO_GUIDE_week04_tdd_test_doubles.md        Week 4, section-by-section
+  DEMO_GUIDE_week05_mocking_coverage.md        Week 5, section-by-section
+  CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
                         before assigning
@@ -89,9 +110,13 @@ pytest                          # the real suite: everything under tests/
 pytest -v                       # same, with each test named
 pytest tests/billing            # just one subpackage
 pytest demos/scope_pitfall -v   # a demo folder, run explicitly (not part of the main suite)
+
+# Coverage (Week 5) -- always pass --cov-branch; statement coverage alone
+# can look deceptively complete.
+pytest --cov=app --cov-branch --cov-report=term-missing
 ```
 
-Expect a full run of `pytest -v` to report **45 passed, 2 xfailed, 1
+Expect a full run of `pytest -v` to report **65 passed, 2 xfailed, 1
 failed**:
 - `XFAIL` — `test_calculate_late_fee[-4-0.0]` in
   `tests/billing/test_late_fees.py` (Week 1's negative-days bug).
@@ -106,15 +131,21 @@ they occur — see `docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md` for
 the full walkthrough. Week 4 is purely additive: its twelve new tests
 (in `tests/notifications/`, `tests/orders/`, and
 `tests/accounts/test_registration_service.py`) all pass — see
-`docs/DEMO_GUIDE_week04_tdd_test_doubles.md`.
+`docs/DEMO_GUIDE_week04_tdd_test_doubles.md`. Week 5 is additive too:
+its twenty new tests (`tests/accounts/test_user_lookup.py`,
+`tests/payments/test_transactions.py`, `tests/pricing/test_membership.py`)
+all pass, and each of this week's new `app/` modules reaches 100% branch
+coverage — see `docs/DEMO_GUIDE_week05_mocking_coverage.md`.
 
 ## Extending this for the *next* lecture
 
 1. If the next lecture needs a new function or class to build test-first
    or to isolate with a double, add it under `app/<some_subpackage>/`,
-   the same way Week 3 added `shipping.py` and Week 4 added
+   the same way Week 3 added `shipping.py`, Week 4 added
    `notifications/password_reset.py`, `orders/order_service.py`, and
-   `accounts/registration_service.py`. Only create a new top-level
+   `accounts/registration_service.py`, and Week 5 added
+   `accounts/user_lookup.py`, `payments/transactions.py`, and
+   `pricing/membership.py`. Only create a new top-level
    `app/` subpackage if the new feature genuinely doesn't fit under
    billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
@@ -122,7 +153,7 @@ the full walkthrough. Week 4 is purely additive: its twelve new tests
    2's `scope_pitfall/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week04_tdd_test_doubles.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week05_mocking_coverage.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 

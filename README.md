@@ -110,6 +110,26 @@ The organization and contents of the repository may evolve throughout the semest
 
 ---
 
+## Weekly Updates
+
+The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
+
+### Week 5 (Sept. 28): Mock vs. MagicMock; Control-Flow Graphs and Coverage
+
+- **Readings:** [`w05_mocking.pdf`](reading_materials/w05_mocking.pdf), [`w05_coverage_testing.pdf`](reading_materials/w05_coverage_testing.pdf)
+- **What changed:** [`CHANGE_SUMMARY_week05.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week05_mocking_coverage.md`](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md)
+- **New tooling:** `pytest-cov` (run `pip install -r demo-testing-suite/requirements.txt`)
+
+| Week | Change summary | Demo guide |
+|---|---|---|
+| 5 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf) | [Mocking & coverage](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md) |
+| 4 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week04.pdf) | [TDD & test doubles](demo-testing-suite/docs/DEMO_GUIDE_week04_tdd_test_doubles.md) |
+| 3 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week03.pdf) | [EP, BVA & negative testing](demo-testing-suite/docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md) |
+| 2 | — | [pytest fixtures](demo-testing-suite/docs/DEMO_GUIDE_week02_pytest_fixtures.md) |
+
+---
+
 ## Tools and Technologies
 
 Students will work with Python-based software testing tools and practices. Depending on the activity, the course may use tools and technologies such as:

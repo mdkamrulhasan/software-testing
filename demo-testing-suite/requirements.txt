@@ -3,3 +3,6 @@
 # pytest.ini) that lets tests import from app/ without installing this
 # project as a package first.
 pytest>=7.4
+# Week 5 (coverage): measures statement and branch coverage via
+# coverage.py -- see docs/DEMO_GUIDE_week05_mocking_coverage.md.
+pytest-cov>=5.0

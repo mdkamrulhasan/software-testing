@@ -1,0 +1,425 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 5}\\[4pt]
+  \large Mock vs.\ MagicMock; Control-Flow Graphs and Coverage\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 4, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 5 and, more importantly, explains \emph{why} each change exists ---
+which testing concept from the two Week 5 readings it demonstrates:
+\begin{itemize}
+\item \textit{Mock vs.\ MagicMock in Python} (closing out the test-doubles unit), and
+\item \textit{Control-Flow Graphs and Statement, Branch, and Path Coverage}.
+\end{itemize}
+Read this alongside the readings and \path{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--4 was removed or rewritten. Everything below is
+\emph{additive}: the running examples you already saw are all still
+there, unchanged, including their two intentional \texttt{xfail} results
+and one intentional \texttt{FAIL}.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{5.9cm}L{1.5cm}L{7.0cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Reading 1: Mock vs.\ MagicMock}}\\
+\path{app/accounts/user_lookup.py} & New & The reading's Examples
+2--6, verbatim: functions that use their dependency through
+\texttt{len()}, indexing, \texttt{in}, iteration, and \texttt{with}. \\
+\path{tests/accounts/test_user_lookup.py} & New & Ten tests: why a
+plain \texttt{Mock} fails, each MagicMock example, and the
+single-use-iterator pitfall. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Reading 2: Control-Flow Graphs and Coverage}}\\
+\path{app/payments/transactions.py} & New & The reading's two CFG
+examples: \path{classify_transaction()} (no loops, 4 paths) and
+\texttt{contains\_negative()} (a loop with a back edge). \\
+\path{tests/payments/test_transactions.py} & New & One test per path
+(\(V(G)=4\)), plus the three basis paths (\(V(G)=3\)) and a ``many''
+case for the loop. \\
+\path{app/pricing/membership.py} & New &
+\path{apply_membership_discount()}: the statement-vs.-branch
+coverage example. \\
+\path{tests/pricing/test_membership.py} & New & Both branches: the
+test that gives 100\% statement coverage, plus the one branch coverage
+additionally demands. \\
+\path{demos/coverage_gaps/} & New & Deliberately under-tested code
+whose \texttt{pytest-cov} reports reproduce the reading: the
+\texttt{2->4} branch gap, and a Python ``goto fail'' analogue. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Adds \texttt{pytest-cov}. \\
+\path{docs/DEMO_GUIDE_week05_mocking_coverage.md} & New &
+Section-by-section lecture companion for both readings. \\
+\texttt{README.md} (suite and repository) & Modified & Updated layout,
+coverage command, expected output, and a Weekly Updates index. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Install the new dependency before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{Part 1: Mock vs.\ MagicMock}
+% ============================================================
+\textbf{Locations:} \path{app/accounts/user_lookup.py},
+\path{tests/accounts/test_user_lookup.py}
+
+Every double you wrote in Week 4 was used only through \textbf{ordinary
+method calls} (\path{repository.insert_user(...)},
+\path{payment_service.process_payment(100)}), so \texttt{Mock} was
+always enough. This week's app file is the first code in the suite
+whose dependencies are used through \textbf{magic methods}:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Function} & \textbf{Operation} & \textbf{Magic method(s)} \\
+\midrule
+\path{process_users(repository)} & \texttt{len(repository)}, \texttt{repository[0]} & \texttt{\_\_len\_\_}, \texttt{\_\_getitem\_\_} \\
+\texttt{check\_permission(user, p)} & \texttt{p in user.permissions} & \texttt{\_\_contains\_\_} \\
+\texttt{get\_names(users)} & \texttt{for user in users} & \texttt{\_\_iter\_\_} \\
+\texttt{read\_file(file)} & \texttt{with file as f} & \texttt{\_\_enter\_\_}, \texttt{\_\_exit\_\_} \\
+\texttt{get\_user\_name(connection, id)} & \texttt{with connection.cursor() as c} & \texttt{\_\_enter\_\_}, \texttt{\_\_exit\_\_} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The test file walks the reading's examples in order. Three tests are
+worth singling out:
+
+\begin{itemize}
+\item \path{test_plain_mock_raises_type_error_on_len} and
+\path{test_plain_mock_works_once_the_magic_method_is_attached_by_hand}
+show the reading's core difference directly: a plain \texttt{Mock}
+fails at \texttt{len()}, until you attach \texttt{\_\_len\_\_} yourself,
+which is what \texttt{MagicMock} does for you.
+\item \path{test_check_permission_mixes_mock_and_magicmock} uses
+a \texttt{Mock} for \texttt{user} and a \texttt{MagicMock} for
+\texttt{user.permissions} in the same test: the choice is made
+\emph{per object}, not per test.
+\item \path{test_iter_return_value_is_silently_empty_the_second_time}
+\textbf{passes}, and that is the pitfall from the reading's Example 4
+warning box: configuring \texttt{iter([...])} means the second loop
+quietly sees nothing.
+\end{itemize}
+
+\begin{lstlisting}[style=shellstyle]
+pytest tests/accounts/test_user_lookup.py -v
+\end{lstlisting}
+
+\begin{tipbox}
+Compare this file with Week 4's
+\path{tests/accounts/test_registration_service.py}. Both mock
+collaborators of account code, but only one needs \texttt{MagicMock}.
+Before reading either test, look at the \emph{production} code and
+predict which. That is the reading's closing Key Idea: \textbf{let the
+code under test choose the mock.}
+\end{tipbox}
+
+% ============================================================
+\section{Part 2: Control-Flow Graphs and Path Coverage}
+% ============================================================
+\textbf{Locations:} \path{app/payments/transactions.py},
+\path{tests/payments/test_transactions.py}
+
+\path{app/payments/transactions.py} holds the reading's two CFG
+examples, verbatim, so you can draw each graph from real code and then
+check your hand-computed numbers against a tool. The tests are
+parametrized with ids that name the path each case exercises:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}llcL{7.6cm}@{}}
+\toprule
+\textbf{Function} & \textbf{Decisions} & \(V(G)\) & \textbf{Test ids} \\
+\midrule
+\texttt{classify\_transaction} & 3 & 4 & \texttt{amount<0}, \texttt{intl-under-1000},\\
+ & & & \texttt{domestic}, \texttt{intl-over-1000} \\
+\texttt{contains\_negative} & 2 & 3 & \texttt{zero-iterations}, \path{one-iteration-early-return},\\
+ & & & \path{one-iteration-loop-exits}, \path{many-iterations-negative-late} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[style=shellstyle]
+pytest tests/payments/test_transactions.py -v \
+    --cov=app.payments.transactions --cov-branch --cov-report=term-missing
+\end{lstlisting}
+
+The report shows 100\% branch coverage. For
+\path{classify_transaction()}, which has no loops, the four tests
+also achieve 100\% \emph{path} coverage. For \texttt{contains\_negative()}
+they cannot: the loop's back edge makes the number of paths grow with
+the input length, so the tests follow basis-path testing instead.
+
+% ============================================================
+\section{Part 2: Statement vs.\ Branch Coverage}
+% ============================================================
+\textbf{Locations:} \path{app/pricing/membership.py},
+\path{tests/pricing/test_membership.py},
+\path{demos/coverage_gaps/myapp.py},
+\path{demos/coverage_gaps/test_myapp.py}
+
+\path{apply_membership_discount()} appears twice, on purpose:
+\begin{itemize}
+\item In the main suite (\path{app/pricing/membership.py}), with both
+branches tested, so it reaches 100\% branch coverage.
+\item In \path{demos/coverage_gaps/myapp.py}, as a four-line copy
+with no docstring, so its line numbers match the reading. Its test
+file covers \emph{only} the member branch.
+\end{itemize}
+
+Run the demo with and without branch measurement:
+\begin{lstlisting}[style=shellstyle]
+pytest demos/coverage_gaps/test_myapp.py --cov=myapp --cov-report=term-missing
+pytest demos/coverage_gaps/test_myapp.py --cov=myapp --cov-branch --cov-report=term-missing
+\end{lstlisting}
+The first run reports \textbf{100\%}. The second reproduces the
+reading's report exactly:
+\begin{lstlisting}[style=shellstyle]
+Name                           Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------
+demos/coverage_gaps/myapp.py       4      0      2      1    83%   2->4
+\end{lstlisting}
+
+\begin{warningbox}
+Statement coverage alone reported 100\% for a function whose
+\texttt{False} branch was never executed. Always pass
+\path{--cov-branch}.
+\end{warningbox}
+
+% ============================================================
+\section{Part 2: A Python ``goto fail''}
+% ============================================================
+\textbf{Locations:} \path{demos/coverage_gaps/handshake.py},
+\path{demos/coverage_gaps/test_handshake.py}
+
+The reading's case study is Apple's CVE-2014-1266, where a duplicated
+line made the signature check unreachable. \texttt{handshake.py} ships a
+Python version of the same mistake: a copy-pasted \texttt{if} that lost
+its \texttt{not}, so the params and signature checks can never run.
+
+\begin{lstlisting}
+def verify_handshake(hash_ok, params_ok, signature_ok):
+    if not hash_ok:
+        return False
+    if hash_ok:  # KNOWN BUG -- copy-paste of the check above, lost its `not`
+        return True
+    if not params_ok:
+        return False
+    if not signature_ok:
+        return False
+    return True
+\end{lstlisting}
+
+Both tests in \texttt{test\_handshake.py} pass. Coverage tells a
+different story:
+\begin{lstlisting}[style=shellstyle]
+pytest demos/coverage_gaps/test_handshake.py \
+    --cov=handshake --cov-report=term-missing
+\end{lstlisting}
+reports only 50\% of statements executed, with lines \textbf{30--34} ---
+every check after the bug --- missing.
+
+\begin{keyidea}
+Why a copy-pasted \texttt{if}, and not simply a stray
+\texttt{return True}? Code after an \emph{unconditional}
+\texttt{return} is statically dead. Python drops it when compiling, and
+\texttt{coverage.py} then does not count it as a statement at all, so
+the report would say 100\%. Coverage reports can only show you lines
+that \emph{could} run; to show the skipped checks, the bypass has to be
+conditional, as the real \texttt{goto fail} was.
+\end{keyidea}
+
+% ============================================================
+\section{Part 2: What Coverage Cannot Tell You}
+% ============================================================
+No new code: this reuses Week 3's \path{determine_shipping_cost()}.
+\begin{lstlisting}[style=shellstyle]
+pytest tests/pricing/test_shipping.py \
+    --cov=app.pricing.shipping --cov-branch --cov-report=term-missing
+\end{lstlisting}
+The report shows \textbf{100\% branch coverage}, and in the same output
+\path{test_valid_weights[5.0-10.0]} is still \texttt{XFAIL}. Coverage
+cannot see that 5.0 is the boundary that exposes the \texttt{< 5} bug;
+only boundary-value analysis found it.
+
+% ============================================================
+\section{Coverage on the Whole Suite}\label{sec:whole-suite}
+% ============================================================
+Pointing the tool at the whole codebase is a good habit, and this
+week it finds something:
+\begin{lstlisting}[style=shellstyle]
+pytest --cov=app --cov-branch --cov-report=term-missing
+\end{lstlisting}
+Every Week 5 module is at 100\%. Two Week 4 files are not, for opposite
+reasons:
+\begin{itemize}
+\item \path{app/orders/order_service.py}: \textbf{80\%, line 37
+missing}. A \emph{real} gap: no test drives \texttt{place\_order()} down
+its \texttt{"Payment failed"} branch. It is left in place for you to
+close (see Suggested Next Steps).
+\item \path{app/notifications/password_reset.py}: \textbf{63\%}, with
+\texttt{SmtpEmailClient} missing. A \emph{deliberate} gap: that class is
+the real SMTP transport, and testing it would need a real mail server,
+which is why the Week 4 seam exists. Chasing 100\% here would make the
+suite worse, not better.
+\end{itemize}
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should now see \textbf{65 passed, 2 xfailed, 1 failed}: twenty
+more passing tests than Week 4's baseline, and the same two
+\texttt{xfail} results and one \texttt{FAIL} as before, unrelated to this
+week's additions. \path{demos/coverage_gaps/} is not part of that
+run (\texttt{pytest.ini} sets \texttt{testpaths = tests}); run it by path.
+
+% ============================================================
+\section{How This Connects to the Readings}
+% ============================================================
+\begin{keyidea}
+Both readings ask you to look at the code under test before writing
+the test. The mocking reading says to let the production code's
+\emph{interface} choose the double: ordinary calls mean \texttt{Mock};
+\texttt{len}, indexing, \texttt{in}, iteration, and \texttt{with} mean
+\texttt{MagicMock}. The coverage reading says to let the production
+code's \emph{structure}, its control-flow graph, show you which tests
+are missing, and then to remember that structure is blind to values.
+This week's files let you practice both against real, running code.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Before opening \path{tests/accounts/test_user_lookup.py}, read
+each function in \path{app/accounts/user_lookup.py} and decide,
+per object, whether you would use \texttt{Mock} or \texttt{MagicMock}.
+\item Draw the CFG of \texttt{contains\_negative()} and compute
+\(V(G) = E - N + 2\). Check that it matches decisions \(+ 1 = 3\).
+\item Close the real gap: add a test to
+\path{tests/orders/test_order_service.py} whose payment stub returns
+\texttt{False}, then re-run the whole-suite coverage command from
+Section~\ref{sec:whole-suite} and confirm \texttt{order\_service.py} reaches 100\%.
+\item In \path{demos/coverage_gaps/test_handshake.py}, add the test
+\texttt{verify\_handshake(True, True, False) is False} and watch it
+fail. Then fix \texttt{handshake.py}.
+\item Try the readings' paper exercises (\texttt{products},
+\texttt{load\_config}, \texttt{grade\_letter}) first by hand, then
+write them as code and use \path{--cov-branch} to check your
+hand-computed coverage.
+\end{enumerate}
+
+\end{document}
