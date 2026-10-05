@@ -1,0 +1,339 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 6}\\[4pt]
+  \large Data-Flow Testing and Coverage Concepts\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 5, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 6 and, more importantly, explains \emph{why} each change exists ---
+which concept from the Week 6 reading, \textit{Data-Flow Testing and
+Coverage Concepts}, it demonstrates. Read this alongside the reading and
+\path{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--5 was removed or rewritten. Everything below is
+\emph{additive}: the running examples you already saw are all still
+there, unchanged, including their two intentional \texttt{xfail} results
+and one intentional \texttt{FAIL}.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{5.9cm}L{1.5cm}L{7.0cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The main suite}}\\
+\path{app/billing/charges.py} & New & The reading's worked example,
+\path{sum_positive()}, verbatim with its S1--S5 labels: sums the
+charges on a statement, skipping credits. \\
+\path{tests/billing/test_charges.py} & New & Four tests whose ids name
+the coverage criterion and the DU pairs each one covers, including the
+loop-carried pair. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Deliberately buggy illustrations (not in the default run)}}\\
+\path{demos/data_flow/accumulator_bug.py} & New & \path{sum_positive()}
+with the loop-carried pair broken. 100\% branch coverage; one All-Uses
+test fails. \\
+\path{demos/data_flow/receipt.py} & New & A correct function where a
+one-test All-Defs set leaves a branch untested (75\%). \\
+\path{demos/data_flow/anomalies.py} & New & A use-before-def and a dead
+definition that tests pass over and \texttt{pylint} finds statically. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Adds \texttt{pylint}. \\
+\path{docs/DEMO_GUIDE_week06_data_flow.md} & New &
+Section-by-section lecture companion for the reading. \\
+\texttt{README.md} (suite and repository) & Modified & Updated layout,
+\texttt{pylint} command, expected output, and the Weekly Updates index. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Install the new dependency before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{The Worked Example: \texttt{sum\_positive()}}
+% ============================================================
+\textbf{Locations:} \path{app/billing/charges.py},
+\path{tests/billing/test_charges.py}
+
+\begin{lstlisting}
+def sum_positive(numbers):
+    total = 0                  # S1
+    for n in numbers:          # S2
+        if n > 0:              # S3
+            total = total + n  # S4
+    return total               # S5
+\end{lstlisting}
+
+The module docstring repeats the reading's def/use table. The test file's
+docstring repeats its seven DU pairs, with a ``covered by'' column. Each
+test id says which criterion the test belongs to:
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lllL{5.6cm}@{}}
+\toprule
+\textbf{Test id} & \textbf{Input} & \textbf{Result} & \textbf{New DU pairs (reading's numbering)} \\
+\midrule
+\texttt{all-defs:credit-only} & \texttt{[-1]} & \texttt{0} & \#2, \#6 \\
+\texttt{all-defs:one-charge} & \texttt{[3]} & \texttt{3} & \#1, \#4, \#5, \#7 \\
+\texttt{all-uses:two-charges} & \texttt{[3, 5]} & \texttt{8} & \#3 (loop-carried) \\
+\path{du-path:loop-carried-via-credit} & \texttt{[3, -2, 5]} & \texttt{8} & none new: \#3 along a second def-clear path \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[style=shellstyle]
+pytest tests/billing/test_charges.py -v \
+    --cov=app.billing.charges --cov-branch --cov-report=term-missing
+\end{lstlisting}
+
+The first two tests already give 100\% branch coverage of this function.
+The third adds no statement and no branch --- it adds a \emph{pair}. The
+fourth reaches pair \#3 through the other back edge (S3's false outcome,
+a skipped credit between two charges). It covers no new DU pair, so
+All-Uses does not require it; it is the kind of extra path All-DU-Paths
+asks for.
+
+% ============================================================
+\section{Why the Loop-Carried Pair Matters}
+% ============================================================
+\textbf{Locations:} \path{demos/data_flow/accumulator_bug.py},
+\path{demos/data_flow/test_accumulator_bug.py}
+
+The same function, with S4 broken:
+\begin{lstlisting}
+            total = 0 + n      # S4  KNOWN BUG -- should be total + n
+\end{lstlisting}
+Each charge now overwrites (\emph{kills}) the running total instead of
+adding to it, and pair \#3 no longer exists. The demo's tests are the
+All-Defs set plus one All-Uses test:
+\begin{lstlisting}[style=shellstyle]
+pytest demos/data_flow/test_accumulator_bug.py -v \
+    --cov=accumulator_bug --cov-branch --cov-report=term-missing
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle]
+Name                                 Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------
+demos/data_flow/accumulator_bug.py       6      0      4      0   100%
+\end{lstlisting}
+The two All-Defs tests pass, with \textbf{100\% statement and branch
+coverage}. Only \path{test_all_uses_two_charges_exposes_the_bug} fails,
+with \texttt{assert 5 == 8}: the function returns the last charge, not
+the sum.
+
+\begin{warningbox}
+Branch coverage confirms every decision ran both ways. It says nothing
+about whether an accumulated value was ever checked after more than one
+update. Whenever a variable is both defined and used inside a loop, ask
+whether the definition also reaches a use on a \emph{later} iteration.
+\end{warningbox}
+
+% ============================================================
+\section{All-Defs Does Not Subsume Branch Coverage}
+% ============================================================
+\textbf{Locations:} \path{demos/data_flow/receipt.py},
+\path{demos/data_flow/test_receipt.py}
+
+The reading states this but its own example happens not to show it:
+in \path{sum_positive()}, the All-Defs set also covers both branches.
+\path{total_with_tax(amount, show_breakdown)} does show it. A single
+call with \path{show_breakdown=False} gives every definition one use,
+which is All-Defs:
+\begin{lstlisting}[style=shellstyle]
+pytest demos/data_flow/test_receipt.py \
+    --cov=receipt --cov-branch --cov-report=term-missing
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle]
+Name                         Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------
+demos/data_flow/receipt.py       6      1      2      1    75%   33
+\end{lstlisting}
+Line 33, the \texttt{print()} on the \texttt{True} branch, never ran.
+Uncomment \path{test_total_with_breakdown} at the bottom of the test
+file: it covers the remaining DU pairs (All-Uses) and the report
+reaches 100\%.
+
+% ============================================================
+\section{Anomalies That Static Analysis Finds}
+% ============================================================
+\textbf{Locations:} \path{demos/data_flow/anomalies.py},
+\path{demos/data_flow/test_anomalies.py}
+
+Two of the reading's defect patterns, shipped on purpose:
+\begin{itemize}
+\item \textbf{Use before def:} \path{describe_balance()} never assigns
+\texttt{status} when the balance is exactly 0.
+\item \textbf{Dead definition:} \path{apply_payment()} computes
+\texttt{remaining} and then returns the wrong variable.
+\end{itemize}
+The three tests pass, and every statement runs. \texttt{pylint} needs no
+tests at all:
+\begin{lstlisting}[style=shellstyle]
+pylint demos/data_flow/anomalies.py --disable=all \
+    --enable=possibly-used-before-assignment,unused-variable
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle]
+anomalies.py:36:25: E0606: Possibly using variable 'status' before assignment
+anomalies.py:40:4: W0612: Unused variable 'remaining'
+\end{lstlisting}
+This is the reading's ``Data-Flow Testing in Practice'' section:
+data-flow \emph{coverage} tools are rare, but def-use \emph{analysis}
+runs inside everyday linters, compilers, and IDEs.
+
+\begin{tipbox}
+In Python, a use before def crashes with \texttt{UnboundLocalError}
+(uncomment \path{test_zero_balance} to see it). In some other languages
+the same mistake silently returns garbage or a stale value, which is why
+the reading treats it as a data-flow defect, not just a crash.
+\end{tipbox}
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should now see \textbf{69 passed, 2 xfailed, 1 failed}: four more
+passing tests than Week 5's baseline, and the same two \texttt{xfail}
+results and one \texttt{FAIL} as before, unrelated to this week's
+additions. \path{demos/data_flow/} is not part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run it by path.
+Its one failing test is intentional.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Week 5's coverage report told you \emph{which code ran}. This week's
+files ask \emph{whether the right values got where they needed to go}.
+The same function, \path{sum_positive()}, appears twice: once correct,
+with tests chosen pair by pair, and once broken, with a test set that
+satisfies All-Defs and 100\% branch coverage and still misses the bug.
+The difference between them is one DU pair.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Before opening \path{tests/billing/test_charges.py}, list the seven
+DU pairs of \path{sum_positive()} yourself and choose a minimal All-Uses
+test set. Then compare with the test ids.
+\item Fix \path{demos/data_flow/accumulator_bug.py} and confirm its
+failing test passes, with the coverage report unchanged at 100\%.
+\item Fix both functions in \path{demos/data_flow/anomalies.py} so that
+\texttt{pylint} reports nothing. Add the boundary test that should
+have caught the first one.
+\item Work the reading's \path{first_negative()} exercises on paper,
+then write the function and a parametrized test whose ids name the DU
+pairs, in the style of \path{test_charges.py}.
+\item The Week 5 coverage gap in \path{app/orders/order_service.py}
+is still open. If you have not closed it yet, do that too.
+\end{enumerate}
+
+\end{document}
