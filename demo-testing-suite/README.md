@@ -16,6 +16,8 @@ Companion pieces:
 - `docs/DEMO_GUIDE_week05_mocking_coverage.md` — the same, for Week 5
   (Mock vs. MagicMock; Control-Flow Graphs and Statement, Branch, and
   Path Coverage).
+- `docs/DEMO_GUIDE_week06_data_flow.md` — the same, for Week 6
+  (Data-Flow Testing and Coverage Concepts).
 - `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
   summaries of what changed in this codebase and why.
 - `final_project/README.md` — how the final project is meant to build
@@ -38,6 +40,9 @@ defects live in real codebases than a fresh bug invented every week.
 ```
 app/                    The "system under test" — grows one feature at a time
   billing/late_fees.py       Week 1 (Testing Foundations)
+  billing/charges.py         Week 6 — data-flow worked example
+                               (sum_positive: defs, uses, DU pairs,
+                               a loop-carried pair)
   pricing/discounts.py       Week 2
   pricing/cart.py            Week 2
   pricing/shipping.py        Week 3 (EP / BVA / negative testing)
@@ -76,6 +81,9 @@ tests/                  The "real" growing suite — mirrors app/'s layout
       basis-path suite
     pricing/test_membership.py                     Week 5's statement-vs-
       branch coverage pair
+    billing/test_charges.py                        Week 6's DU-pair suite:
+      test ids name the criterion (All-Defs / All-Uses / All-DU-Paths)
+      and the pairs each test covers
 
   practice/                 In-class live-coding scripts — not named
                              `test_*.py`, so plain `pytest` skips them
@@ -89,12 +97,18 @@ demos/                  Deliberately isolated teaching examples — NOT
   coverage_gaps/            Week 5: deliberately under-tested code whose
                              pytest-cov reports reproduce the reading
                              (`2->4` branch gap; a "goto fail" analogue)
+  data_flow/                Week 6: a broken loop-carried DU pair that
+                             still gets 100% branch coverage; an
+                             All-Defs set that leaves a branch untested;
+                             use-before-def and dead-def anomalies for
+                             pylint to find statically
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
   DEMO_GUIDE_week03_ep_bva_negative_testing.md Week 3, section-by-section
   DEMO_GUIDE_week04_tdd_test_doubles.md        Week 4, section-by-section
   DEMO_GUIDE_week05_mocking_coverage.md        Week 5, section-by-section
+  DEMO_GUIDE_week06_data_flow.md               Week 6, section-by-section
   CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
@@ -114,9 +128,14 @@ pytest demos/scope_pitfall -v   # a demo folder, run explicitly (not part of the
 # Coverage (Week 5) -- always pass --cov-branch; statement coverage alone
 # can look deceptively complete.
 pytest --cov=app --cov-branch --cov-report=term-missing
+
+# Static def-use analysis (Week 6) -- finds use-before-def and dead
+# definitions without running any test.
+pylint demos/data_flow/anomalies.py --disable=all \
+    --enable=possibly-used-before-assignment,unused-variable
 ```
 
-Expect a full run of `pytest -v` to report **65 passed, 2 xfailed, 1
+Expect a full run of `pytest -v` to report **69 passed, 2 xfailed, 1
 failed**:
 - `XFAIL` — `test_calculate_late_fee[-4-0.0]` in
   `tests/billing/test_late_fees.py` (Week 1's negative-days bug).
@@ -135,7 +154,11 @@ the full walkthrough. Week 4 is purely additive: its twelve new tests
 its twenty new tests (`tests/accounts/test_user_lookup.py`,
 `tests/payments/test_transactions.py`, `tests/pricing/test_membership.py`)
 all pass, and each of this week's new `app/` modules reaches 100% branch
-coverage — see `docs/DEMO_GUIDE_week05_mocking_coverage.md`.
+coverage — see `docs/DEMO_GUIDE_week05_mocking_coverage.md`. Week 6 is
+additive as well: its four new tests (`tests/billing/test_charges.py`)
+all pass and `app/billing/charges.py` is at 100% branch coverage. Its
+deliberately buggy examples live in `demos/data_flow/`, outside the
+default run — see `docs/DEMO_GUIDE_week06_data_flow.md`.
 
 ## Extending this for the *next* lecture
 
@@ -143,17 +166,17 @@ coverage — see `docs/DEMO_GUIDE_week05_mocking_coverage.md`.
    or to isolate with a double, add it under `app/<some_subpackage>/`,
    the same way Week 3 added `shipping.py`, Week 4 added
    `notifications/password_reset.py`, `orders/order_service.py`, and
-   `accounts/registration_service.py`, and Week 5 added
+   `accounts/registration_service.py`, Week 5 added
    `accounts/user_lookup.py`, `payments/transactions.py`, and
-   `pricing/membership.py`. Only create a new top-level
+   `pricing/membership.py`, and Week 6 added `billing/charges.py`. Only create a new top-level
    `app/` subpackage if the new feature genuinely doesn't fit under
    billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration (like Week
-   2's `scope_pitfall/`), add it under `demos/<short_topic_name>/` and
+   2's `scope_pitfall/` or Week 6's `data_flow/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week05_mocking_coverage.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week06_data_flow.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 

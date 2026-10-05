@@ -12,7 +12,7 @@ least one `yield` fixture with real teardown, a deliberate and justified
 choice of fixture scope, at least one parametrized test, and a
 `conftest.py` used correctly (not just because "that's where fixtures
 go"). Grading then maps directly onto this lecture's Learning Objectives
-slide, plus whatever later lectures (mocking, coverage, EP/BVA) add.
+slide, plus whatever later lectures (mocking, coverage, data flow, EP/BVA) add.
 
 ## Suggested structure once assigned
 

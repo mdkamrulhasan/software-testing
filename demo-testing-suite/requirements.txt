@@ -6,3 +6,7 @@ pytest>=7.4
 # Week 5 (coverage): measures statement and branch coverage via
 # coverage.py -- see docs/DEMO_GUIDE_week05_mocking_coverage.md.
 pytest-cov>=5.0
+# Week 6 (data flow): static def-use analysis -- flags use-before-def
+# and dead definitions in demos/data_flow/anomalies.py without running
+# a single test. See docs/DEMO_GUIDE_week06_data_flow.md.
+pylint>=3.2

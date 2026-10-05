@@ -114,6 +114,14 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
+### Week 6 (Oct. 5): Data-Flow Testing and Coverage Concepts
+
+- **Reading:** [`w06_data_flow_testing.pdf`](reading_materials/w06_data_flow_testing.pdf)
+- **Slides:** [`6.1_Data_Flow_Testing.pdf`](lectures/F26/6.1_Data_Flow_Testing.pdf)
+- **What changed:** [`CHANGE_SUMMARY_week06.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week06_data_flow.md`](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md)
+- **New tooling:** `pylint`, for static def-use analysis (run `pip install -r demo-testing-suite/requirements.txt`)
+
 ### Week 5 (Sept. 28): Mock vs. MagicMock; Control-Flow Graphs and Coverage
 
 - **Readings:** [`w05_mocking.pdf`](reading_materials/w05_mocking.pdf), [`w05_coverage_testing.pdf`](reading_materials/w05_coverage_testing.pdf)
@@ -123,6 +131,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 6 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf) | [Data-flow testing](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md) |
 | 5 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf) | [Mocking & coverage](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md) |
 | 4 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week04.pdf) | [TDD & test doubles](demo-testing-suite/docs/DEMO_GUIDE_week04_tdd_test_doubles.md) |
 | 3 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week03.pdf) | [EP, BVA & negative testing](demo-testing-suite/docs/DEMO_GUIDE_week03_ep_bva_negative_testing.md) |
