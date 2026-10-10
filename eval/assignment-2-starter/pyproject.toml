@@ -1,0 +1,26 @@
+[project]
+name = "se413-513-assignment-2"
+version = "0.1.0"
+description = "SE 413/513 Assignment 2 -- Coverage, Data-Flow Testing, and Test Doubles (starter code)"
+requires-python = ">=3.9"
+
+[tool.pytest.ini_options]
+# Allows tests to `import registration` directly without packaging src/.
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+# Pre-registered markers (same set as Assignment 1). Apply them to your
+# tests as appropriate; you may register additional markers of your own.
+markers = [
+    "unit: fast, isolated unit tests",
+    "positive: tests for valid / expected-success scenarios",
+    "negative: tests for invalid input / expected-failure scenarios",
+    "boundary: tests targeting boundary values identified via boundary-value analysis",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
