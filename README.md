@@ -121,7 +121,8 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 - **What changed:** [`CHANGE_SUMMARY_week07.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf)
 - **Demo guide:** [`DEMO_GUIDE_week07_coverage_based_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md)
 - **Reading's reports, reproduced:** [`demo-testing-suite/demos/coverage_reports/`](demo-testing-suite/demos/coverage_reports/) (run from inside that folder)
-- **New tooling:** none; `coverage` (already installed with `pytest-cov`) is now pinned to `>=7.5` (run `pip install -r demo-testing-suite/requirements.txt`)
+- **`coverage.py` vs. `pytest-cov`:** [`demo-testing-suite/demos/coverage_vs_pytest_cov/`](demo-testing-suite/demos/coverage_vs_pytest_cov/): how the two tools share one engine, data file, and config, and when to use which (run from inside that folder)
+- **New tooling:** `pytest-xdist`, for parallel test workers; `coverage` (already installed with `pytest-cov`) is now pinned to `>=7.5` (run `pip install -r demo-testing-suite/requirements.txt`)
 
 ### Week 6 (Oct. 5): Data-Flow Testing and Coverage Concepts
 

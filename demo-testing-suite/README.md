@@ -182,8 +182,11 @@ default run — see `docs/DEMO_GUIDE_week06_data_flow.md`. Week 7 adds
 three tests that close the last two whole-suite coverage gaps (in
 `tests/orders/` and `tests/notifications/`), all passing, which brings
 every `app/` module to 100% branch coverage. Its reading-reproduction
-mini-project lives in `demos/coverage_reports/`, outside the default
-run — see `docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
+mini-project lives in `demos/coverage_reports/`, and a second one
+comparing `coverage.py` with `pytest-cov` (shared data file, `--append`,
+parallel `pytest-xdist` workers) lives in `demos/coverage_vs_pytest_cov/`.
+Both are outside the default run — see
+`docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
 
 ## Extending this for the *next* lecture
 
@@ -199,7 +202,7 @@ run — see `docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration (like Week
    2's `scope_pitfall/`, Week 6's `data_flow/`, or Week 7's
-   `coverage_reports/`), add it under `demos/<short_topic_name>/` and
+   `coverage_reports/` and `coverage_vs_pytest_cov/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
 4. Copy `docs/DEMO_GUIDE_week07_coverage_based_testing.md` as a starting

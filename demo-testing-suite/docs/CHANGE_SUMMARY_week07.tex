@@ -102,11 +102,12 @@ Measuring and Interpreting Coverage with \texttt{coverage.py} and
 and \path{demo-testing-suite/README.md}.
 
 \begin{keyidea}
-Nothing from Weeks 1--6 was removed. This week does two things: it
+Nothing from Weeks 1--6 was removed. This week does three things: it
 adds a small, self-contained project that reproduces every coverage
-report in the reading, and it applies the reading's method to the
+report in the reading; it applies the reading's method to the
 \emph{real} suite, closing the two coverage gaps that have been open
-since Week 4. The two intentional \texttt{xfail} results and one
+since Week 4; and it adds a second small project showing how
+\texttt{coverage.py} and \texttt{pytest-cov} relate. The two intentional \texttt{xfail} results and one
 intentional \texttt{FAIL} are unchanged.
 \end{keyidea}
 
@@ -139,9 +140,21 @@ reading's \texttt{[tool.coverage.*]} configuration. \\
 \path{demos/coverage_reports/README.md} & New & Every command, in the
 reading's order, with its expected result. \\
 \midrule
+\multicolumn{3}{@{}l}{\textit{\texttt{coverage.py} vs.\ \texttt{pytest-cov} (not in the default run)}}\\
+\path{demos/coverage_vs_pytest_cov/tempconv/temps.py} & New & A tiny
+temperature module: the code under test. \\
+\path{demos/coverage_vs_pytest_cov/tests/test_temps.py} & New & A
+deliberately thin suite (67\% branch). \\
+\path{demos/coverage_vs_pytest_cov/report.py} & New & A command-line
+script pytest never runs, measured with \texttt{coverage run}. \\
+\path{demos/coverage_vs_pytest_cov/coverage_settings.toml},
+\texttt{README.md} & New & Shared settings, and every command with its
+expected output. \\
+\midrule
 \multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
 \texttt{requirements.txt} & Modified & Pins \texttt{coverage>=7.5} (the
-HTML report's Functions view). \\
+HTML report's Functions view); adds \texttt{pytest-xdist} (parallel
+test workers). \\
 \texttt{.gitignore} & Modified & Ignores \texttt{coverage.xml} and
 \texttt{coverage.json}. \\
 \path{docs/DEMO_GUIDE_week07_coverage_based_testing.md} & New &
@@ -304,6 +317,56 @@ coverage number.
 \end{warningbox}
 
 % ============================================================
+\section{\texttt{coverage.py} vs.\ \texttt{pytest-cov}: How They Relate}
+% ============================================================
+\textbf{Location:} \path{demos/coverage_vs_pytest_cov/}
+
+The reading uses both tools, and they produced identical numbers. This
+second mini-project shows \emph{why}: \texttt{pytest-cov} is a
+\texttt{pytest} plugin that drives the \texttt{coverage.py} engine, so the
+two share one data file (\texttt{.coverage}) and one configuration. It
+also shows when each is the better choice. It uses its own
+\path{tempconv} package, so its line numbers are independent of
+\path{checkout_app}. As before, \textbf{run its commands from inside the
+folder}:
+\begin{lstlisting}[style=shellstyle]
+cd demos/coverage_vs_pytest_cov
+\end{lstlisting}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}L{6.4cm}L{3.6cm}L{4.6cm}@{}}
+\toprule
+\textbf{Run} & \textbf{Result} & \textbf{What it shows} \\
+\midrule
+\texttt{pytest -{}-cov=tempconv -{}-cov-branch}, and
+\texttt{coverage run -{}-branch -{}-source=tempconv -m pytest}
+& both 67\%; \texttt{7, 10} & Same engine, same numbers \\
+\texttt{pytest -{}-cov ...}, then \texttt{coverage report -m} & same
+67\% table, no re-run & One shared \texttt{.coverage} file \\
+\texttt{coverage run ... report.py -5 30} & 83\%; \texttt{9} & Measuring
+a script, not a test run \\
+then \texttt{coverage run -{}-append ... -m pytest} & 100\% & Combining
+two runs \\
+\texttt{pytest -n 2 -{}-cov=tempconv -{}-cov-branch} & 67\% &
+\texttt{pytest-cov} measures the xdist workers \\
+\texttt{coverage run ... -m pytest -n 2} & 0\% & Bare
+\texttt{coverage run} sees only the main process \\
+\texttt{coverage run -m pytest} (no \texttt{-{}-source}) & \texttt{TOTAL 85\%}
+& Test files inflate the total \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keyidea}
+Use \texttt{pytest-cov} for test runs, especially in CI or with parallel
+workers. Use \texttt{coverage.py} directly to measure something that is
+not a \texttt{pytest} run (a script, a manual run), to combine data from
+several runs, or to produce more reports from data you already have.
+Either way, it is the same measurement.
+\end{keyidea}
+
+% ============================================================
 \section{Updated: Expected Test Results}
 % ============================================================
 From the project root:
@@ -315,9 +378,10 @@ pytest -v
 you should now see \textbf{72 passed, 2 xfailed, 1 failed}: three more
 passing tests than Week 6's baseline, and the same two \texttt{xfail}
 results and one \texttt{FAIL} as before, unrelated to this week's
-additions. \path{demos/coverage_reports/} is not part of that run
-(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run it from
-inside the folder.
+additions. Neither \path{demos/coverage_reports/} nor
+\path{demos/coverage_vs_pytest_cov/} is part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run each from
+inside its folder.
 
 % ============================================================
 \section{How This Connects to the Reading}
@@ -348,6 +412,9 @@ compare.
 from the project root and use the Functions view to confirm that every
 function in \path{app/} has been entered. Then name one function whose
 100\% you would \emph{not} trust, and explain why.
+\item In \path{demos/coverage_vs_pytest_cov/}, run the parallel-worker
+pair (\texttt{pytest -n 2 -{}-cov} vs.\ \texttt{coverage run -m pytest
+-n 2}) and explain the 67\% vs.\ 0\% difference in one sentence.
 \end{enumerate}
 
 \end{document}
