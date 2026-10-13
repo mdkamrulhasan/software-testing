@@ -18,6 +18,8 @@ Companion pieces:
   Path Coverage).
 - `docs/DEMO_GUIDE_week06_data_flow.md` — the same, for Week 6
   (Data-Flow Testing and Coverage Concepts).
+- `docs/DEMO_GUIDE_week07_coverage_based_testing.md` — the same, for
+  Week 7 (Coverage-Based Testing with `coverage.py` and `pytest-cov`).
 - `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
   summaries of what changed in this codebase and why.
 - `final_project/README.md` — how the final project is meant to build
@@ -84,6 +86,9 @@ tests/                  The "real" growing suite — mirrors app/'s layout
     billing/test_charges.py                        Week 6's DU-pair suite:
       test ids name the criterion (All-Defs / All-Uses / All-DU-Paths)
       and the pairs each test covers
+    orders/ + notifications/                       Week 7 closed the two
+      gaps the whole-suite coverage report had shown since Week 4
+      (a declined-payment stub; SmtpEmailClient vs. a patched smtplib)
 
   practice/                 In-class live-coding scripts — not named
                              `test_*.py`, so plain `pytest` skips them
@@ -102,6 +107,10 @@ demos/                  Deliberately isolated teaching examples — NOT
                              All-Defs set that leaves a branch untested;
                              use-before-def and dead-def anomalies for
                              pylint to find statically
+  coverage_reports/         Week 7: a self-contained mini-project (its own
+                             checkout_app/ and tests/) that reproduces
+                             every coverage.py / pytest-cov report in the
+                             reading. Run it from inside that folder.
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
@@ -109,6 +118,7 @@ docs/
   DEMO_GUIDE_week04_tdd_test_doubles.md        Week 4, section-by-section
   DEMO_GUIDE_week05_mocking_coverage.md        Week 5, section-by-section
   DEMO_GUIDE_week06_data_flow.md               Week 6, section-by-section
+  DEMO_GUIDE_week07_coverage_based_testing.md  Week 7, section-by-section
   CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
@@ -129,13 +139,18 @@ pytest demos/scope_pitfall -v   # a demo folder, run explicitly (not part of the
 # can look deceptively complete.
 pytest --cov=app --cov-branch --cov-report=term-missing
 
+# Whole-suite coverage (Week 7) -- every app/ module is now at 100%
+# branch coverage; list only what isn't:
+pytest --cov=app --cov-branch --cov-report=term-missing:skip-covered
+pytest --cov=app --cov-branch --cov-report=html     # htmlcov/index.html
+
 # Static def-use analysis (Week 6) -- finds use-before-def and dead
 # definitions without running any test.
 pylint demos/data_flow/anomalies.py --disable=all \
     --enable=possibly-used-before-assignment,unused-variable
 ```
 
-Expect a full run of `pytest -v` to report **69 passed, 2 xfailed, 1
+Expect a full run of `pytest -v` to report **72 passed, 2 xfailed, 1
 failed**:
 - `XFAIL` — `test_calculate_late_fee[-4-0.0]` in
   `tests/billing/test_late_fees.py` (Week 1's negative-days bug).
@@ -158,7 +173,12 @@ coverage — see `docs/DEMO_GUIDE_week05_mocking_coverage.md`. Week 6 is
 additive as well: its four new tests (`tests/billing/test_charges.py`)
 all pass and `app/billing/charges.py` is at 100% branch coverage. Its
 deliberately buggy examples live in `demos/data_flow/`, outside the
-default run — see `docs/DEMO_GUIDE_week06_data_flow.md`.
+default run — see `docs/DEMO_GUIDE_week06_data_flow.md`. Week 7 adds
+three tests that close the last two whole-suite coverage gaps (in
+`tests/orders/` and `tests/notifications/`), all passing, which brings
+every `app/` module to 100% branch coverage. Its reading-reproduction
+mini-project lives in `demos/coverage_reports/`, outside the default
+run — see `docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
 
 ## Extending this for the *next* lecture
 
@@ -173,10 +193,11 @@ default run — see `docs/DEMO_GUIDE_week06_data_flow.md`.
    billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration (like Week
-   2's `scope_pitfall/` or Week 6's `data_flow/`), add it under `demos/<short_topic_name>/` and
+   2's `scope_pitfall/`, Week 6's `data_flow/`, or Week 7's
+   `coverage_reports/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week06_data_flow.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week07_coverage_based_testing.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 

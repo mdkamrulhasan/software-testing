@@ -5,3 +5,5 @@ __pycache__/
 .env-se/
 .coverage
 htmlcov/
+coverage.xml
+coverage.json

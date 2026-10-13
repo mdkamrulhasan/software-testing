@@ -9,14 +9,21 @@ tour. This file keeps only:
     object that has a `.send(to, message)` method (the reading's own
     description of what a test may supply), and
   - the "Mocks that lie" pitfall from Common Pitfalls, demonstrated
-    against this module's EmailClient interface.
+    against this module's EmailClient interface, and
+  - (Week 7) two tests for SmtpEmailClient, written to close the gap the
+    whole-suite coverage report showed in this file (63%, lines 50-56).
 """
 
-from unittest.mock import Mock, create_autospec
+import smtplib
+from unittest.mock import Mock, create_autospec, patch
 
 import pytest
 
-from app.notifications.password_reset import EmailClient, PasswordResetService
+from app.notifications.password_reset import (
+    EmailClient,
+    PasswordResetService,
+    SmtpEmailClient,
+)
 
 
 class RecordingEmailClient:
@@ -61,3 +68,33 @@ def test_autospec_mock_catches_the_same_typo():
 
     with pytest.raises(AttributeError):
         strict_mock.sedn("alice@example.com", "oops")
+
+
+# ---------------------------------------------------------------------
+# Week 7 (coverage-based testing): closing the SmtpEmailClient gap.
+# The report said lines 50-56 never ran. Read as behavior, that is two
+# unchecked promises: the message goes to the configured host, and the
+# connection is closed even if sending fails (the `finally`). Patching
+# smtplib.SMTP checks both without a mail server.
+# ---------------------------------------------------------------------
+def test_smtp_client_sends_through_the_configured_host_and_quits():
+    with patch("smtplib.SMTP") as smtp_class:
+        SmtpEmailClient(host="mail.test").send("alice@example.com", "hi")
+
+    smtp_class.assert_called_once_with("mail.test")
+    server = smtp_class.return_value
+    server.sendmail.assert_called_once_with(
+        "noreply@example.com", "alice@example.com", "hi"
+    )
+    server.quit.assert_called_once()
+
+
+def test_smtp_client_quits_even_when_sending_fails():
+    with patch("smtplib.SMTP") as smtp_class:
+        server = smtp_class.return_value
+        server.sendmail.side_effect = smtplib.SMTPRecipientsRefused({})
+
+        with pytest.raises(smtplib.SMTPRecipientsRefused):
+            SmtpEmailClient().send("nobody@example.com", "hi")
+
+    server.quit.assert_called_once()

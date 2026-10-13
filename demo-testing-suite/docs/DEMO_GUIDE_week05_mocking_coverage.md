@@ -233,6 +233,14 @@ class to explain each before you do:
   not a target" pitfall: 100% here would mean a worse test suite, not a
   better one.
 
+*Update (Week 7):* both gaps are now closed, the coverage-based way: a
+declined-payment stub for `place_order()`, and two `SmtpEmailClient`
+tests against a patched `smtplib.SMTP`, so no mail server is needed.
+Only the abstract `EmailClient.send` is excluded, with a visible
+`# pragma: no cover` and a reason. To see the gaps live again, see
+"The same method, on the real suite" in
+`docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
+
 ## A Practical Mental Model / Summary
 
 No code. Recap using the four mental-model prompts.

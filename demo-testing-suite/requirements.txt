@@ -10,3 +10,8 @@ pytest-cov>=5.0
 # and dead definitions in demos/data_flow/anomalies.py without running
 # a single test. See docs/DEMO_GUIDE_week06_data_flow.md.
 pylint>=3.2
+# Week 7 (coverage-based testing): the `coverage` command itself, run
+# directly (coverage run / report / html / json / xml). pytest-cov
+# already pulls it in; pinned here because the HTML report's Functions
+# view needs 7.5+. See docs/DEMO_GUIDE_week07_coverage_based_testing.md.
+coverage>=7.5

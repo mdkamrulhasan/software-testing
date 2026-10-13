@@ -1,0 +1,17 @@
+# The Week 7 reading's "Making Settings Permanent" configuration.
+# In a real project this lives in pyproject.toml. It is named
+# coverage_settings.toml here so that it only applies when passed
+# explicitly (coverage --rcfile=... / pytest --cov-config=...) -- see
+# README.md.
+
+[tool.coverage.run]
+branch = true
+source = ["checkout_app"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 90
+exclude_also = [
+    "if __name__ == .__main__.:",
+]
