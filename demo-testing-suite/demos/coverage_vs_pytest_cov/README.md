@@ -1,7 +1,8 @@
 # Demo: `coverage.py` vs. `pytest-cov`
 
 A self-contained mini-project for the standalone 10-slide deck
-*`coverage.py` vs. `pytest-cov`: How They Relate and When to Use Which*.
+*`coverage.py` vs. `pytest-cov`: How They Relate and When to Use Which*
+(`lectures/F26/7.2_Coverage_py_vs_pytest-cov.pdf` at the repository root).
 It is independent of the Week 7 reading's `checkout_app` (that one lives
 in `../coverage_reports/`). Every output below was produced by running
 these files with coverage.py 7.16, pytest-cov 7.1, and pytest-xdist.

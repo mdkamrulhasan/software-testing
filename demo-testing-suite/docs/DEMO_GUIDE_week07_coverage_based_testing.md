@@ -285,7 +285,8 @@ No code. Close with the reading's takeaway list.
 
 **Folder:** `demos/coverage_vs_pytest_cov/` (run from inside it)
 
-For the standalone 10-slide deck on how the two tools relate. It uses
+For the standalone 10-slide deck on how the two tools relate
+(`lectures/F26/7.2_Coverage_py_vs_pytest-cov.pdf`). It uses
 its own `tempconv` package, so its line numbers are independent of
 `checkout_app`. `demos/coverage_vs_pytest_cov/README.md` lists every
 command slide by slide, with the expected output. The two runs worth

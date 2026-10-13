@@ -117,7 +117,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 ### Week 7 (Oct. 12): Coverage-Based Testing
 
 - **Reading:** [`w07_coverage_based_testing.pdf`](reading_materials/w07_coverage_based_testing.pdf)
-- **Slides:** [`7.1_Coverage_Based_Testing.pdf`](lectures/F26/7.1_Coverage_Based_Testing.pdf)
+- **Slides:** [`7.1_Coverage_Based_Testing.pdf`](lectures/F26/7.1_Coverage_Based_Testing.pdf), [`7.2_Coverage_py_vs_pytest-cov.pdf`](lectures/F26/7.2_Coverage_py_vs_pytest-cov.pdf)
 - **What changed:** [`CHANGE_SUMMARY_week07.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf)
 - **Demo guide:** [`DEMO_GUIDE_week07_coverage_based_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md)
 - **Reading's reports, reproduced:** [`demo-testing-suite/demos/coverage_reports/`](demo-testing-suite/demos/coverage_reports/) (run from inside that folder)
