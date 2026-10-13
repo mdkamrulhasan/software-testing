@@ -114,6 +114,15 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
+### Week 7 (Oct. 12): Coverage-Based Testing
+
+- **Reading:** [`w07_coverage_based_testing.pdf`](reading_materials/w07_coverage_based_testing.pdf)
+- **Slides:** [`7.1_Coverage_Based_Testing.pdf`](lectures/F26/7.1_Coverage_Based_Testing.pdf)
+- **What changed:** [`CHANGE_SUMMARY_week07.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week07_coverage_based_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md)
+- **Reading's reports, reproduced:** [`demo-testing-suite/demos/coverage_reports/`](demo-testing-suite/demos/coverage_reports/) (run from inside that folder)
+- **New tooling:** none; `coverage` (already installed with `pytest-cov`) is now pinned to `>=7.5` (run `pip install -r demo-testing-suite/requirements.txt`)
+
 ### Week 6 (Oct. 5): Data-Flow Testing and Coverage Concepts
 
 - **Reading:** [`w06_data_flow_testing.pdf`](reading_materials/w06_data_flow_testing.pdf)
@@ -131,6 +140,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 7 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf) | [Coverage-based testing](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md) |
 | 6 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf) | [Data-flow testing](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md) |
 | 5 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf) | [Mocking & coverage](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md) |
 | 4 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week04.pdf) | [TDD & test doubles](demo-testing-suite/docs/DEMO_GUIDE_week04_tdd_test_doubles.md) |
