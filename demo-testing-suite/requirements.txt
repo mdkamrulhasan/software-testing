@@ -15,3 +15,8 @@ pylint>=3.2
 # already pulls it in; pinned here because the HTML report's Functions
 # view needs 7.5+. See docs/DEMO_GUIDE_week07_coverage_based_testing.md.
 coverage>=7.5
+# Week 7 (coverage.py vs. pytest-cov mini-deck): runs tests in parallel
+# worker processes, to show that pytest-cov measures the workers while a
+# bare `coverage run -m pytest -n 2` reports 0%. See
+# demos/coverage_vs_pytest_cov/README.md.
+pytest-xdist>=3.0

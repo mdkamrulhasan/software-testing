@@ -5,7 +5,7 @@ Interpreting Coverage with `coverage.py` and `pytest-cov`*. Copied from
 `docs/DEMO_GUIDE_week06_data_flow.md`'s template, same shape, following
 the reading's own section order.
 
-**Before class:** reinstall requirements (now pins `coverage>=7.5`)
+**Before class:** reinstall requirements (now pins `coverage>=7.5` and adds `pytest-xdist`)
 and confirm the baseline (aside from the known, intentional
 non-passes carried over from Weeks 1 and 3; see below):
 
@@ -278,6 +278,27 @@ the boundary test above.
 ## Key Takeaways for SE 413/513
 
 No code. Close with the reading's takeaway list.
+
+---
+
+## Companion mini-deck: `coverage.py` vs. `pytest-cov`
+
+**Folder:** `demos/coverage_vs_pytest_cov/` (run from inside it)
+
+For the standalone 10-slide deck on how the two tools relate. It uses
+its own `tempconv` package, so its line numbers are independent of
+`checkout_app`. `demos/coverage_vs_pytest_cov/README.md` lists every
+command slide by slide, with the expected output. The two runs worth
+doing live:
+
+- **Shared data file:** `pytest --cov=tempconv --cov-branch`, then
+  `coverage report -m` with no re-run: same 67% table.
+- **Parallel workers:** `pytest -n 2 --cov=tempconv --cov-branch` reports
+  67%, but `coverage run --branch --source=tempconv -m pytest -n 2`
+  reports 0% with "No data was collected". Needs `pytest-xdist`, now in
+  `requirements.txt`.
+
+Afterwards, `coverage erase && rm -rf htmlcov` in that folder too.
 
 ---
 

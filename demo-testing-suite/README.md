@@ -111,6 +111,11 @@ demos/                  Deliberately isolated teaching examples — NOT
                              checkout_app/ and tests/) that reproduces
                              every coverage.py / pytest-cov report in the
                              reading. Run it from inside that folder.
+  coverage_vs_pytest_cov/   Week 7 mini-deck: a tiny tempconv package, a
+                             CLI script, and a thin suite showing how
+                             coverage.py and pytest-cov relate (shared
+                             .coverage file, --append, xdist). Also run
+                             from inside that folder.
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
