@@ -54,6 +54,20 @@ def test_place_order_confirms_when_payment_succeeds():
     assert place_order(payment_stub) == "Order confirmed"
 
 
+class DecliningPaymentStub:
+    """Added in Week 7: the whole-suite coverage report showed line 37 of
+    order_service.py -- the "Payment failed" return -- had never run,
+    because PaymentStub above only ever says yes. A second canned answer
+    closes the gap."""
+
+    def process_payment(self, amount):
+        return False
+
+
+def test_place_order_reports_failure_when_payment_is_declined():
+    assert place_order(DecliningPaymentStub()) == "Payment failed"
+
+
 # ---------------------------------------------------------------------
 # Fake -- a lightweight, genuinely working implementation; verified via
 # STATE VERIFICATION.

@@ -1,0 +1,14 @@
+# The deck's "They Share a Data File and a Config" settings.
+# In a real project this lives in pyproject.toml. It is named
+# coverage_settings.toml here so that it only applies when passed
+# explicitly (coverage --rcfile=... / pytest --cov-config=...);
+# otherwise fail_under = 80 and source = ["tempconv"] would silently
+# change every other demo in this folder. See README.md.
+
+[tool.coverage.run]
+branch = true
+source = ["tempconv"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80

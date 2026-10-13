@@ -1,0 +1,420 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 7}\\[4pt]
+  \large Coverage-Based Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 6, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 7 and, more importantly, explains \emph{why} each change exists ---
+which concept from the Week 7 reading, \textit{Coverage-Based Testing:
+Measuring and Interpreting Coverage with \texttt{coverage.py} and
+\texttt{pytest-cov}}, it demonstrates. Read this alongside the reading
+and \path{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--6 was removed. This week does three things: it
+adds a small, self-contained project that reproduces every coverage
+report in the reading; it applies the reading's method to the
+\emph{real} suite, closing the two coverage gaps that have been open
+since Week 4; and it adds a second small project showing how
+\texttt{coverage.py} and \texttt{pytest-cov} relate. The two intentional \texttt{xfail} results and one
+intentional \texttt{FAIL} are unchanged.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{5.9cm}L{1.5cm}L{7.0cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The main suite: closing real gaps}}\\
+\path{tests/orders/test_order_service.py} & Modified & A declined-payment
+stub: \path{place_order()}'s \texttt{"Payment failed"} line had never
+run. \\
+\path{tests/notifications/test_password_reset_service.py} & Modified &
+Two \path{SmtpEmailClient} tests against a patched \texttt{smtplib.SMTP}
+--- no mail server needed. \\
+\path{app/notifications/password_reset.py} & Modified & One justified
+\texttt{\#~pragma:\ no~cover} (an abstract method); docstrings updated. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The reading, reproduced (not in the default run)}}\\
+\path{demos/coverage_reports/checkout_app/checkout.py} & New & The
+reading's running example, verbatim: every line number matches. \\
+\path{demos/coverage_reports/tests/} & New & The v1, v2,
+coupons-only, and no-assertion suites from the reading. \\
+\path{demos/coverage_reports/coverage_settings.toml} & New & The
+reading's \texttt{[tool.coverage.*]} configuration. \\
+\path{demos/coverage_reports/README.md} & New & Every command, in the
+reading's order, with its expected result. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{\texttt{coverage.py} vs.\ \texttt{pytest-cov} (not in the default run)}}\\
+\path{demos/coverage_vs_pytest_cov/tempconv/temps.py} & New & A tiny
+temperature module: the code under test. \\
+\path{demos/coverage_vs_pytest_cov/tests/test_temps.py} & New & A
+deliberately thin suite (67\% branch). \\
+\path{demos/coverage_vs_pytest_cov/report.py} & New & A command-line
+script pytest never runs, measured with \texttt{coverage run}. \\
+\path{demos/coverage_vs_pytest_cov/coverage_settings.toml},
+\texttt{README.md} & New & Shared settings, and every command with its
+expected output. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Pins \texttt{coverage>=7.5} (the
+HTML report's Functions view); adds \texttt{pytest-xdist} (parallel
+test workers). \\
+\texttt{.gitignore} & Modified & Ignores \texttt{coverage.xml} and
+\texttt{coverage.json}. \\
+\path{docs/DEMO_GUIDE_week07_coverage_based_testing.md} & New &
+Section-by-section lecture companion for the reading. \\
+\texttt{README.md} (suite and repository) & Modified & Updated layout,
+coverage commands, expected output, and the Weekly Updates index. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Reinstall the requirements before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{The Reading's Reports, Reproduced}
+% ============================================================
+\textbf{Location:} \path{demos/coverage_reports/}
+
+This folder is a miniature project laid out exactly like the reading's
+(\path{checkout_app/checkout.py}, \path{tests/test_checkout_v1.py},
+\ldots), so that report paths and line numbers match the reading
+character for character. \textbf{Run its commands from inside the
+folder:}
+\begin{lstlisting}[style=shellstyle]
+cd demos/coverage_reports
+\end{lstlisting}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}L{5.2cm}L{4.4cm}L{5.0cm}@{}}
+\toprule
+\textbf{Run} & \textbf{Result} & \textbf{Reading section} \\
+\midrule
+v1, \texttt{coverage run} / \texttt{report} & \texttt{TOTAL 81\%} (test
+files included) & The Basic Report \\
+v1, \texttt{-{}-source=checkout\_app}, \texttt{-m} & 74\%; \texttt{8,
+16-17, 24, 28} & Showing What Was Missed \\
+v1, \texttt{-{}-branch} & 66\%; \texttt{BrPart 3} & Turning On Branch
+Coverage \\
+v1, settings file (\texttt{-{}-rcfile}) & exit 2:
+\texttt{66 < fail-under=90} & Making Settings Permanent \\
+v1, \texttt{pytest -{}-cov-fail-under=80} & 3 passed, exit 1 & Enforcing
+a Minimum \\
+coupons-only & 41\%; \texttt{16->18} & Reading the \texttt{Missing}
+Column \\
+v2 & 100\%, 9 passed & Closing the Gaps \\
+no-assertion test & 100\%, 1 passed & Limitation 1 \\
+v2 vs.\ \texttt{amount > 50} (live edit) & 100\%, 9 passed & Limitation
+3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{warningbox}
+Do not add a docstring to \path{checkout_app/checkout.py} or reformat
+it. Every \texttt{Missing} entry in the reading names a line of this
+file, so moving a line breaks the whole demo.
+\end{warningbox}
+
+\subsection*{Why \texttt{coverage\_settings.toml}, not \texttt{pyproject.toml}}
+The reading's configuration turns on branch measurement, restricts
+\texttt{source}, and sets \texttt{fail\_under = 90}. If the folder had a
+\texttt{pyproject.toml} containing it, \emph{every} run would use those
+settings, and you could never see the 81\% $\rightarrow$ 74\%
+$\rightarrow$ 66\% progression. So the settings live under a name
+nothing reads by default, and the ``permanent settings'' step names the
+file explicitly:
+\begin{lstlisting}[style=shellstyle]
+coverage run --rcfile=coverage_settings.toml -m pytest tests/test_checkout_v1.py
+coverage report --rcfile=coverage_settings.toml
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle]
+Coverage failure: total of 66 is less than fail-under=90
+\end{lstlisting}
+\texttt{pytest -{}-cov -{}-cov-config=coverage\_settings.toml} reads the
+same file. In your own project, call it \texttt{pyproject.toml} and
+drop the flag.
+
+% ============================================================
+\section{From Report to Tests, on the Real Suite}
+% ============================================================
+\textbf{Locations:} \path{tests/orders/test_order_service.py},
+\path{tests/notifications/test_password_reset_service.py},
+\path{app/notifications/password_reset.py}
+
+Since Week 5, the whole-suite report has shown two gaps:
+\begin{lstlisting}[style=shellstyle]
+app/notifications/password_reset.py      19      7      0      0    63%   34, 47, 50-56
+app/orders/order_service.py               8      1      2      1    80%   37
+\end{lstlisting}
+Following the reading's ``From Report to Tests'' method, each gap was
+read as a \emph{behavior} that had never been checked, not as a line
+number to hit:
+
+\begin{center}
+\small
+\begin{tabular}{@{}L{3.7cm}L{5.0cm}L{5.7cm}@{}}
+\toprule
+\textbf{Gap} & \textbf{Behavior never checked} & \textbf{What was done} \\
+\midrule
+\path{order_service.py},\newline line 37 & A declined payment is reported as
+\texttt{"Payment failed"} & New \path{DecliningPaymentStub}: a second
+canned answer next to Week 4's \path{PaymentStub} \\
+\path{password_reset.py},\newline lines 47, 50--56 & \path{SmtpEmailClient} sends to
+the configured host, and closes the connection \emph{even when sending
+fails} (the \texttt{finally}) & Two tests that patch
+\texttt{smtplib.SMTP} (Week 5's mocking), so no mail server is
+involved \\
+\path{password_reset.py},\newline line 34 & None: it is the abstract
+\path{EmailClient.send}, which only raises
+\texttt{NotImplementedError} & Excluded with
+\texttt{\#~pragma:\ no~cover} and a comment giving the reason \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{lstlisting}[style=shellstyle]
+pytest --cov=app --cov-branch --cov-report=term-missing:skip-covered
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle,language={}]
+TOTAL     113      0     34      0   100%
+
+22 files skipped due to complete coverage.
+\end{lstlisting}
+
+\begin{tipbox}
+Compare the two decisions in \path{password_reset.py}. The abstract
+method is excluded because it has no behavior, and that reason fits in
+one comment that would pass code review. \path{SmtpEmailClient} was
+\emph{not} excluded, even though it looked hard to test: being hard to
+test is not a reason to exclude code (Best Practice 7). A test double
+made it easy after all.
+\end{tipbox}
+
+% ============================================================
+\section{What 100\% Still Does Not Tell You}
+% ============================================================
+Every \path{app/} module is now at 100\% branch coverage. The demo
+folder shows why that is not the same as ``fully tested'':
+\begin{itemize}
+\item \path{tests/test_checkout_noassert.py} reaches 100\% with
+\textbf{no assertions} (Limitation 1).
+\item In the v2 suite, \texttt{amount >= 50} is never true; the only
+True outcome of line 22 comes from \texttt{is\_member} (Limitation 2).
+\item Changing \texttt{>=} to \texttt{>} on line 22 leaves v2 passing,
+at 100\% (Limitation 3). Make the edit, run, then restore with
+\texttt{git checkout -{}- checkout\_app/checkout.py}.
+\end{itemize}
+
+\begin{warningbox}
+The same is true of the main suite. Week 1's \path{calculate_late_fee}
+bug and Week 3's shipping boundary bug both sit inside files that report
+100\%. Those defects are found by the \texttt{xfail} tests, not by the
+coverage number.
+\end{warningbox}
+
+% ============================================================
+\section{\texttt{coverage.py} vs.\ \texttt{pytest-cov}: How They Relate}
+% ============================================================
+\textbf{Location:} \path{demos/coverage_vs_pytest_cov/}
+
+The reading uses both tools, and they produced identical numbers. This
+second mini-project shows \emph{why}: \texttt{pytest-cov} is a
+\texttt{pytest} plugin that drives the \texttt{coverage.py} engine, so the
+two share one data file (\texttt{.coverage}) and one configuration. It
+also shows when each is the better choice. It uses its own
+\path{tempconv} package, so its line numbers are independent of
+\path{checkout_app}. As before, \textbf{run its commands from inside the
+folder}:
+\begin{lstlisting}[style=shellstyle]
+cd demos/coverage_vs_pytest_cov
+\end{lstlisting}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}L{6.4cm}L{3.6cm}L{4.6cm}@{}}
+\toprule
+\textbf{Run} & \textbf{Result} & \textbf{What it shows} \\
+\midrule
+\texttt{pytest -{}-cov=tempconv -{}-cov-branch}, and
+\texttt{coverage run -{}-branch -{}-source=tempconv -m pytest}
+& both 67\%; \texttt{7, 10} & Same engine, same numbers \\
+\texttt{pytest -{}-cov ...}, then \texttt{coverage report -m} & same
+67\% table, no re-run & One shared \texttt{.coverage} file \\
+\texttt{coverage run ... report.py -5 30} & 83\%; \texttt{9} & Measuring
+a script, not a test run \\
+then \texttt{coverage run -{}-append ... -m pytest} & 100\% & Combining
+two runs \\
+\texttt{pytest -n 2 -{}-cov=tempconv -{}-cov-branch} & 67\% &
+\texttt{pytest-cov} measures the xdist workers \\
+\texttt{coverage run ... -m pytest -n 2} & 0\% & Bare
+\texttt{coverage run} sees only the main process \\
+\texttt{coverage run -m pytest} (no \texttt{-{}-source}) & \texttt{TOTAL 85\%}
+& Test files inflate the total \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{keyidea}
+Use \texttt{pytest-cov} for test runs, especially in CI or with parallel
+workers. Use \texttt{coverage.py} directly to measure something that is
+not a \texttt{pytest} run (a script, a manual run), to combine data from
+several runs, or to produce more reports from data you already have.
+Either way, it is the same measurement.
+\end{keyidea}
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should now see \textbf{72 passed, 2 xfailed, 1 failed}: three more
+passing tests than Week 6's baseline, and the same two \texttt{xfail}
+results and one \texttt{FAIL} as before, unrelated to this week's
+additions. Neither \path{demos/coverage_reports/} nor
+\path{demos/coverage_vs_pytest_cov/} is part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run each from
+inside its folder.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Weeks 5 and 6 defined coverage criteria. This week is about using the
+tools: measure, read the gaps rather than the percentage, and turn each
+gap into a behavior-level test with a real assertion. The demo folder
+shows that method on the reading's own example. The two closed gaps
+show it on code you have been working with since Week 4.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item From \path{demos/coverage_reports/}, reproduce the 74\% and 66\%
+numbers, then open the HTML report (\texttt{coverage html}) and find
+the three yellow lines (the reading's Exercise 3).
+\item Write the two tests Exercise 4 asks for, then make the
+\texttt{>=}~$\rightarrow$~\texttt{>} edit and confirm that one of them
+fails. Restore the file afterwards.
+\item Before reading the new tests in \path{tests/orders/} and
+\path{tests/notifications/}, restore the Week 6 versions (see the demo
+guide), look at the two gaps, and write your own tests for them. Then
+compare.
+\item Run \texttt{pytest -{}-cov=app -{}-cov-branch -{}-cov-report=html}
+from the project root and use the Functions view to confirm that every
+function in \path{app/} has been entered. Then name one function whose
+100\% you would \emph{not} trust, and explain why.
+\item In \path{demos/coverage_vs_pytest_cov/}, run the parallel-worker
+pair (\texttt{pytest -n 2 -{}-cov} vs.\ \texttt{coverage run -m pytest
+-n 2}) and explain the 67\% vs.\ 0\% difference in one sentence.
+\end{enumerate}
+
+\end{document}
