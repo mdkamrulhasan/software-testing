@@ -1,0 +1,297 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 8}\\[4pt]
+  \large Functional Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 7, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 8 and, more importantly, explains \emph{why} each change exists ---
+which concept from the Week 8 reading, \textit{Functional Testing:
+Designing Tests from the Specification}, it demonstrates. Read this
+alongside the reading and \path{demo-testing-suite/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--7 was removed or changed. This week adds one
+small, self-contained project that runs every example in the reading:
+the decision table for shipping fees, the \texttt{Order} state machine,
+the pairwise checkout rows, and the Hypothesis property for splitting a
+bill --- together with the buggy versions each technique catches. The
+main suite is untouched, so its expected results are the same as last
+week.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{5.9cm}L{1.5cm}L{7.0cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The reading, runnable (not in the default run): \path{demos/functional_testing/}}}\\
+\path{shop/shipping.py}, \path{shop/shipping_buggy.py} & New &
+\texttt{shipping\_fee} for REQ-1--4, and a version that checks the
+free-shipping rule first. \\
+\path{shop/order.py} & New & The \texttt{Order} state machine for
+REQ-5--7. \\
+\path{shop/split.py}, \path{shop/split_fixed.py} & New &
+\texttt{split\_bill} for REQ-8: the reading's buggy first version, and
+the fix in integer cents. \\
+\path{tests/test_shipping_dt.py} & New & One test per decision-table
+rule (R1--R5). \\
+\path{tests/test_shipping_bva.py} & New & The \$50 boundary: 49.99
+and 50.0. \\
+\path{tests/test_order.py} & New & All-transitions coverage: 5 valid,
+15 invalid, 2 refund tests. \\
+\path{pairwise.py}, \path{tests/test_checkout_pairwise.py} & New & The
+\texttt{allpairspy} rows, a check that every pair is covered, and the
+rows as \texttt{pytest} cases. \\
+\path{tests/test_split_pbt.py} & New & The Hypothesis property for
+REQ-8. \\
+\texttt{README.md} & New & Every command, in the reading's order, with
+its expected result. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Adds \texttt{hypothesis} and
+\texttt{allpairspy}. \\
+\texttt{.gitignore} & Modified & Ignores \texttt{.hypothesis/},
+Hypothesis's local example database. \\
+\path{docs/DEMO_GUIDE_week08_functional_testing.md} & New &
+Section-by-section lecture companion for the reading. \\
+\texttt{README.md} (suite and repository) & Modified & Updated layout
+and the Weekly Updates index. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Reinstall the requirements before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{The Reading's Examples, Runnable}
+% ============================================================
+\textbf{Location:} \path{demos/functional_testing/}
+
+This folder is laid out exactly like the reading
+(\path{shop/shipping.py}, \path{tests/test_order.py}, \ldots), so the
+reading's \texttt{from shop.}\textit{module}\texttt{ import} lines and \texttt{pytest}
+commands work as printed. \textbf{Run its commands from inside the
+folder:}
+\begin{lstlisting}[style=shellstyle]
+cd demos/functional_testing
+\end{lstlisting}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}L{5.6cm}L{4.4cm}L{4.6cm}@{}}
+\toprule
+\textbf{Run} & \textbf{Result} & \textbf{Reading section} \\
+\midrule
+\texttt{pytest tests/test\_shipping\_bva.py} & 2 passed & Recap: EP and
+BVA \\
+\ldots{} after changing \texttt{>=~50} to \texttt{>~50} & fails at
+\texttt{50.0} & Recap: EP and BVA \\
+\texttt{pytest tests/test\_shipping\_dt.py -v} & 5 passed, IDs R1--R5 &
+One Test per Rule \\
+\ldots{} importing \path{shop.shipping_buggy} & R1 fails; 1 failed, 4
+passed & What It Catches \\
+\texttt{pytest tests/test\_order.py} & 22 passed & Implementing the
+Tests \\
+\texttt{python pairwise.py} & 10 rows; 45 of 45 pairs & The Pairwise
+Idea \\
+\texttt{pytest tests/test\_checkout\_pairwise.py} & 10 skipped (no
+oracle yet) & Limitations \\
+\texttt{pytest tests/test\_split\_pbt.py} & fails; shrunk to
+\texttt{total\_cents=1, people=2} & From Examples to Properties \\
+\ldots{} importing \path{shop.split_fixed} & 1 passed & Fixing the
+Defect \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{warningbox}
+Two demos are run by changing one import line, and they go in opposite
+directions. \path{tests/test_shipping_dt.py} imports the
+\emph{correct} \path{shop.shipping}; you switch it to
+\path{shop.shipping_buggy}. \path{tests/test_split_pbt.py} imports the
+\emph{buggy} \path{shop.split}; you switch it to \path{shop.split_fixed}.
+That is why a plain \texttt{pytest} in this folder reports
+\texttt{1 failed, 29 passed, 10 skipped}: the one failure is REQ-8's, on
+purpose. Switch any import you changed back afterwards.
+\end{warningbox}
+
+\subsection*{Why the pairwise test is skipped}
+The reading leaves the body of \texttt{test\_checkout\_pairwise} as an
+ellipsis (\texttt{...}), a placeholder. Run that way, all ten rows would \emph{pass} while
+checking nothing --- Week 7's ``100\% coverage, zero assertions'' trap
+in a new form. Pairwise testing chooses combinations; it does not supply
+expected results. Until there is a \texttt{checkout()} function and an
+expected result for each row, every row is skipped with the reason
+``no oracle yet''.
+
+\subsection*{\texttt{.hypothesis/}}
+Hypothesis saves every failing input in a local database
+(\path{.hypothesis/}) and tries those inputs first on the next run, so
+a bug that comes back is caught at once. Delete the folder to watch
+Hypothesis search from scratch. It is listed in \texttt{.gitignore}.
+
+% ============================================================
+\section{Something to Check Yourself}
+% ============================================================
+The pairwise slide's ``Done early?'' asks whether every valid pair is
+still covered after filtering out ``gift card with a non-USD currency''.
+Run the same coverage check that \path{pairwise.py} uses on the filtered
+set before you answer.
+
+\begin{keyidea}
+A generated test set is a claim, not a guarantee. Last week, a coverage
+number needed reading before it could be trusted; this week, the
+output of a pairwise generator does. A few lines of checking code ---
+like the one in \path{pairwise.py} --- tell you whether the claim holds.
+\end{keyidea}
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should still see \textbf{72 passed, 2 xfailed, 1 failed}, exactly
+as in Week 7. \path{demos/functional_testing/} is not part of that run
+(\path{pytest.ini} sets \texttt{testpaths = tests}); run it from inside
+its folder.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Weeks 5--7 asked whether the tests exercised the code. This week asks
+whether the code does what the specification says. Each file in the
+demo folder is one model from the reading --- a table, a state machine,
+a parameter set, a property --- turned into tests, and each buggy
+version is a defect that the model finds and a coverage report would
+not.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Switch \path{tests/test_shipping_dt.py} to the buggy version and
+add a case for rule R2 at \$80. Predict the result before running it.
+Then switch the import back.
+\item Add the \texttt{return\_item} event to \path{shop/order.py}
+(Exercise 3) and extend \path{tests/test_order.py} to keep
+all-transitions coverage. How many tests pass now?
+\item Add \texttt{currency} to \path{pairwise.py} (Exercise 4), filter
+out gift card with a non-USD currency, and run the coverage check on
+the filtered rows.
+\item Write the two \texttt{apply\_coupon} properties from Exercise 5 in
+\path{demos/coverage_reports/}. If Hypothesis finds a counterexample,
+decide whether the defect is in the code or in the property.
+\item Run
+\texttt{pytest -{}-cov=shop -{}-cov-branch -{}-cov-report=term-missing}
+on just the two shipping test files, and explain why four
+\path{shop/} modules report 0\%.
+\end{enumerate}
+
+\end{document}

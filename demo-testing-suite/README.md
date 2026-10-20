@@ -20,6 +20,9 @@ Companion pieces:
   (Data-Flow Testing and Coverage Concepts).
 - `docs/DEMO_GUIDE_week07_coverage_based_testing.md` — the same, for
   Week 7 (Coverage-Based Testing with `coverage.py` and `pytest-cov`).
+- `docs/DEMO_GUIDE_week08_functional_testing.md` — the same, for
+  Week 8 (Functional Testing: decision tables, state transitions,
+  pairwise, and property-based testing).
 - `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
   summaries of what changed in this codebase and why.
 - `final_project/README.md` — how the final project is meant to build
@@ -116,6 +119,12 @@ demos/                  Deliberately isolated teaching examples — NOT
                              coverage.py and pytest-cov relate (shared
                              .coverage file, --append, xdist). Also run
                              from inside that folder.
+  functional_testing/       Week 8: a self-contained mini-project (its own
+                             shop/ and tests/) with the reading's decision
+                             table, Order state machine, allpairspy rows,
+                             and Hypothesis property -- plus the buggy
+                             versions each technique catches. Run it from
+                             inside that folder.
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
@@ -124,6 +133,7 @@ docs/
   DEMO_GUIDE_week05_mocking_coverage.md        Week 5, section-by-section
   DEMO_GUIDE_week06_data_flow.md               Week 6, section-by-section
   DEMO_GUIDE_week07_coverage_based_testing.md  Week 7, section-by-section
+  DEMO_GUIDE_week08_functional_testing.md      Week 8, section-by-section
   CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
@@ -186,7 +196,11 @@ mini-project lives in `demos/coverage_reports/`, and a second one
 comparing `coverage.py` with `pytest-cov` (shared data file, `--append`,
 parallel `pytest-xdist` workers) lives in `demos/coverage_vs_pytest_cov/`.
 Both are outside the default run — see
-`docs/DEMO_GUIDE_week07_coverage_based_testing.md`.
+`docs/DEMO_GUIDE_week07_coverage_based_testing.md`. Week 8 adds nothing
+to the default run, so the counts above are unchanged: its decision-table,
+state-transition, pairwise, and property-based examples (and the buggy
+versions they catch) live in `demos/functional_testing/` — see
+`docs/DEMO_GUIDE_week08_functional_testing.md`.
 
 ## Extending this for the *next* lecture
 
@@ -201,11 +215,12 @@ Both are outside the default run — see
    billing/pricing/reports/payments/accounts/notifications/orders.
 2. Add its tests under the mirroring `tests/<some_subpackage>/` path.
 3. If the lecture needs a dedicated, isolated illustration (like Week
-   2's `scope_pitfall/`, Week 6's `data_flow/`, or Week 7's
-   `coverage_reports/` and `coverage_vs_pytest_cov/`), add it under `demos/<short_topic_name>/` and
+   2's `scope_pitfall/`, Week 6's `data_flow/`, Week 7's
+   `coverage_reports/` and `coverage_vs_pytest_cov/`, or Week 8's
+   `functional_testing/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week07_coverage_based_testing.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week08_functional_testing.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 
