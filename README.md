@@ -114,6 +114,15 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
+### Week 8 (Oct. 19): Functional Testing
+
+- **Reading:** [`w08_functional_testing.pdf`](reading_materials/w08_functional_testing.pdf)
+- **Slides:** [`8.1_Functional_Testing.pdf`](lectures/F26/8.1_Functional_Testing.pdf)
+- **What changed:** [`CHANGE_SUMMARY_week08.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week08_functional_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md)
+- **Reading's examples, runnable:** [`demo-testing-suite/demos/functional_testing/`](demo-testing-suite/demos/functional_testing/): decision table, state transitions, pairwise, and property-based tests for the checkout specification (run from inside that folder)
+- **New tooling:** `hypothesis` (property-based testing) and `allpairspy` (pairwise combinations) (run `pip install -r demo-testing-suite/requirements.txt`)
+
 ### Week 7 (Oct. 12): Coverage-Based Testing
 
 - **Reading:** [`w07_coverage_based_testing.pdf`](reading_materials/w07_coverage_based_testing.pdf)
@@ -141,6 +150,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 8 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
 | 7 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf) | [Coverage-based testing](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md) |
 | 6 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf) | [Data-flow testing](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md) |
 | 5 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf) | [Mocking & coverage](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md) |
