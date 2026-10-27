@@ -5,7 +5,9 @@ Testing: Testing How Components Work Together*. It is a small shop
 backend with six integration points, a third-party payment provider
 (faked, but over real HTTP), and two deliberately broken components.
 Every listing and output in the reading comes from running these files
-with pytest 9.1, Flask 3.1, requests 2.34, and responses 0.26.
+with pytest 9.1, Flask 3.1, requests 2.34, and responses 0.26. The
+reading (`reading_materials/w09_integration_testing.pdf`) prints the
+key listings and summarizes the rest; the full code is all here.
 
 **Run every command from this folder**, not from `demo-testing-suite/`:
 

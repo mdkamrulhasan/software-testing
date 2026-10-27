@@ -1,11 +1,29 @@
 # Demo Guide — Integration Testing
 
 Companion to the Week 9 reading, *Integration Testing: Testing How
-Components Work Together*
-(`reading_materials/w09_integration_testing.pdf`). Copied from
+Components Work Together*. Copied from
 `docs/DEMO_GUIDE_week08_functional_testing.md`'s template, same shape,
 following the reading's section order. There is no slide deck this
 week; the reading's figures and tables carry the lecture.
+
+**Two editions, one source.** The reading comes in two editions built
+from the same LaTeX file, with identical section numbering:
+- **Student edition** (26 pp.): `reading_materials/w09_integration_testing.pdf`,
+  the copy in the repository. Every section, concept, figure, exercise,
+  and discussion question, with some explanations condensed and
+  secondary listings, extra `curl` transcripts, and a few reference
+  tables omitted. Students find the omitted code in
+  `demos/integration_testing/`.
+- **Instructor edition** (35 pp.): the complete reading. It is **not
+  in the repository**, because the repository is public, and it is kept
+  with the LaTeX source. It is the edition this guide follows; where a
+  step below uses something only the instructor edition prints, the
+  step says so.
+
+To rebuild either edition: `tectonic -X compile w09_integration_testing.tex`
+(student) or `w09_integration_testing_instructor.tex` (instructor; a
+two-line wrapper). Instructor-only text is wrapped in
+`\ifinstructor ... \else <student text> \fi`.
 
 **Before class:** reinstall requirements (this week adds `flask`,
 `requests`, and `responses`) and confirm the baseline:
@@ -120,7 +138,8 @@ Test" box in the reading: integration point, scenario, oracle, test.
 **Files:** `tests/test_api_topdown.py`, `tests/test_api.py`, `serve.py`
 
 With `python serve.py` running in another terminal, do the reading's
-`curl` exchanges (the README has them): 201 with `Location`, then drop
+`curl` exchanges (the README has them; the student edition prints only
+the first, the instructor edition all of them): 201 with `Location`, then drop
 the API key (401), send `"quantity": "2"` (400), order `TEE` (409).
 Restart with `--provider-mode unavailable` for the 503 with
 `Retry-After`.
@@ -258,7 +277,10 @@ homework.
 
 ## Best Practices / Common Mistakes
 
-No new code. Each mistake points at something already run today:
+No new code. Each mistake points at something already run today (the
+student edition prints four of these as boxes; "checking only the
+response" and "shared databases and fixed ports" are instructor edition
+only, so say them aloud):
 - Passing unit tests ≠ working system → the three runs of
   `test_order_service_unit.py`.
 - Testing everything end-to-end → `assert 502 == 201`, and the buggy
