@@ -20,11 +20,18 @@ coverage>=7.5
 # bare `coverage run -m pytest -n 2` reports 0%. See
 # demos/coverage_vs_pytest_cov/README.md.
 pytest-xdist>=3.0
-# Week 8 (functional testing): property-based testing -- generates
+# Weeks 8-9 (functional testing): property-based testing -- generates
 # inputs to falsify a "for all" requirement and shrinks failures to a
 # minimal example. See demos/functional_testing/tests/test_split_pbt.py.
 hypothesis>=6.100
-# Week 8 (functional testing): pairwise (2-way) combination generator.
+# Weeks 8-9 (functional testing): pairwise (2-way) combination generator.
 # See demos/functional_testing/pairwise.py and
 # docs/DEMO_GUIDE_week08_functional_testing.md.
 allpairspy>=2.5
+# Week 10 (integration testing): the demo shop's HTTP API (Flask), its
+# client for the third-party payment provider (requests), and stubbing
+# that provider at the HTTP layer (responses). See
+# demos/integration_testing/README.md.
+flask>=3.0
+requests>=2.31
+responses>=0.25
