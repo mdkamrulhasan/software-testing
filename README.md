@@ -117,6 +117,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 ### Week 9 (Oct. 26): Integration Testing
 
 - **Reading:** [`w09_integration_testing.pdf`](reading_materials/w09_integration_testing.pdf) (student edition; the code it summarizes is in the demo folder below)
+- **Slides:** [`9.1_Integration_Testing_I.pdf`](lectures/F26/9.1_Integration_Testing_I.pdf) (strategies, reviews, APIs), [`9.2_Integration_Testing_II.pdf`](lectures/F26/9.2_Integration_Testing_II.pdf) (databases, services, doubles, automation)
 - **What changed:** [`CHANGE_SUMMARY_week09.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week09.pdf)
 - **Demo guide:** [`DEMO_GUIDE_week09_integration_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week09_integration_testing.md)
 - **Reading's examples, runnable:** [`demo-testing-suite/demos/integration_testing/`](demo-testing-suite/demos/integration_testing/): a small shop with an HTTP API, a SQLite database, and a fake third-party payment provider; its API specifications and design review; and integration tests for each integration point (run from inside that folder)

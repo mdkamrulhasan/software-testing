@@ -3,8 +3,34 @@
 Companion to the Week 9 reading, *Integration Testing: Testing How
 Components Work Together*. Copied from
 `docs/DEMO_GUIDE_week08_functional_testing.md`'s template, same shape,
-following the reading's section order. There is no slide deck this
-week; the reading's figures and tables carry the lecture.
+following the reading's section order.
+
+**Slides: two 75-minute sessions.**
+`lectures/F26/9.1_Integration_Testing_I.pdf` (24 slides; reading Sections
+1-7: why, strategies, design/API reviews, APIs) and
+`lectures/F26/9.2_Integration_Testing_II.pdf` (27 slides; Sections 8-13:
+databases, services, test doubles, automation), in the same style as
+`7.3_Coverage_Reports_demo`. The editable `.pptx` files, with speaker
+notes on every slide (timings, commands, and the answers to every TRY
+IT), are kept with the reading's LaTeX source, outside the repository.
+Each deck's boxes map onto this guide:
+
+| Deck box | What runs | Guide section |
+|---|---|---|
+| 9.1 LIVE DEMO 1 | `pytest` in the demo folder: 46 passed | Before class |
+| 9.1 LIVE DEMO 2 | the unit tests, three runs, three passes | Where We Are / What Is Integration Testing? |
+| 9.1 LIVE DEMO 3 | `SHOP_PAYMENTS=v1 pytest tests/test_api.py` | Integration Strategies |
+| 9.1 TRY IT 1 | map test files to integration points | Integration Strategies / The Running Example |
+| 9.1 TRY IT 2 | review `specs/payment_provider_api.md` | Design and API Reviews |
+| 9.1 LIVE DEMO 4, 5 | `serve.py` + `curl`; `test_api_topdown.py` | API Integration Testing |
+| 9.1 TRY IT 3 | two new top-down API tests (answers in the notes) | API Integration Testing |
+| 9.1 LIVE DEMO 6 | the practice answer: v1 vs. the contract check | Test Doubles |
+| 9.2 LIVE DEMO 1, 2, 3 | repository; foreign-key line; `assert 3 == 5` | Database Integration Testing |
+| 9.2 TRY IT 1, LIVE DEMO 4 | predict, then run, the switch table | Database Integration Testing |
+| 9.2 LIVE DEMO 5, 8 | outages, timeouts; a timeout is an unknown | Service Integration Testing |
+| 9.2 LIVE DEMO 6 | loose stub vs. contract check | Test Doubles |
+| 9.2 TRY IT 2, 3 | a 201 without an `id`; the half-registered user | Practice Exercises (Exercises 5 and 4) |
+| 9.2 LIVE DEMO 7 | `pytest -m integration -rx` | Back in the Main Suite |
 
 **Two editions, one source.** The reading comes in two editions built
 from the same LaTeX file, with identical section numbering:
