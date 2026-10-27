@@ -1,12 +1,12 @@
-# Week 9 demo: integration testing
+# Week 10 demo: integration testing
 
-A self-contained mini-project for the Week 9 reading, *Integration
+A self-contained mini-project for the Week 10 reading, *Integration
 Testing: Testing How Components Work Together*. It is a small shop
 backend with six integration points, a third-party payment provider
 (faked, but over real HTTP), and two deliberately broken components.
 Every listing and output in the reading comes from running these files
 with pytest 9.1, Flask 3.1, requests 2.34, and responses 0.26. The
-reading (`reading_materials/w09_integration_testing.pdf`) prints the
+reading (`reading_materials/w10_integration_testing.pdf`) prints the
 key listings and summarizes the rest; the full code is all here.
 
 **Run every command from this folder**, not from `demo-testing-suite/`:

@@ -1,14 +1,14 @@
 # Demo Guide — Integration Testing
 
-Companion to the Week 9 reading, *Integration Testing: Testing How
+Companion to the Week 10 reading, *Integration Testing: Testing How
 Components Work Together*. Copied from
 `docs/DEMO_GUIDE_week08_functional_testing.md`'s template, same shape,
 following the reading's section order.
 
 **Slides: two 75-minute sessions.**
-`lectures/F26/9.1_Integration_Testing_I.pdf` (24 slides; reading Sections
+`lectures/F26/10.1_Integration_Testing_I.pdf` (24 slides; reading Sections
 1-7: why, strategies, design/API reviews, APIs) and
-`lectures/F26/9.2_Integration_Testing_II.pdf` (27 slides; Sections 8-13:
+`lectures/F26/10.2_Integration_Testing_II.pdf` (27 slides; Sections 8-13:
 databases, services, test doubles, automation), in the same style as
 `7.3_Coverage_Reports_demo`. The editable `.pptx` files, with speaker
 notes on every slide (timings, commands, and the answers to every TRY
@@ -17,24 +17,24 @@ Each deck's boxes map onto this guide:
 
 | Deck box | What runs | Guide section |
 |---|---|---|
-| 9.1 LIVE DEMO 1 | `pytest` in the demo folder: 46 passed | Before class |
-| 9.1 LIVE DEMO 2 | the unit tests, three runs, three passes | Where We Are / What Is Integration Testing? |
-| 9.1 LIVE DEMO 3 | `SHOP_PAYMENTS=v1 pytest tests/test_api.py` | Integration Strategies |
-| 9.1 TRY IT 1 | map test files to integration points | Integration Strategies / The Running Example |
-| 9.1 TRY IT 2 | review `specs/payment_provider_api.md` | Design and API Reviews |
-| 9.1 LIVE DEMO 4, 5 | `serve.py` + `curl`; `test_api_topdown.py` | API Integration Testing |
-| 9.1 TRY IT 3 | two new top-down API tests (answers in the notes) | API Integration Testing |
-| 9.1 LIVE DEMO 6 | the practice answer: v1 vs. the contract check | Test Doubles |
-| 9.2 LIVE DEMO 1, 2, 3 | repository; foreign-key line; `assert 3 == 5` | Database Integration Testing |
-| 9.2 TRY IT 1, LIVE DEMO 4 | predict, then run, the switch table | Database Integration Testing |
-| 9.2 LIVE DEMO 5, 8 | outages, timeouts; a timeout is an unknown | Service Integration Testing |
-| 9.2 LIVE DEMO 6 | loose stub vs. contract check | Test Doubles |
-| 9.2 TRY IT 2, 3 | a 201 without an `id`; the half-registered user | Practice Exercises (Exercises 5 and 4) |
-| 9.2 LIVE DEMO 7 | `pytest -m integration -rx` | Back in the Main Suite |
+| 10.1 LIVE DEMO 1 | `pytest` in the demo folder: 46 passed | Before class |
+| 10.1 LIVE DEMO 2 | the unit tests, three runs, three passes | Where We Are / What Is Integration Testing? |
+| 10.1 LIVE DEMO 3 | `SHOP_PAYMENTS=v1 pytest tests/test_api.py` | Integration Strategies |
+| 10.1 TRY IT 1 | map test files to integration points | Integration Strategies / The Running Example |
+| 10.1 TRY IT 2 | review `specs/payment_provider_api.md` | Design and API Reviews |
+| 10.1 LIVE DEMO 4, 5 | `serve.py` + `curl`; `test_api_topdown.py` | API Integration Testing |
+| 10.1 TRY IT 3 | two new top-down API tests (answers in the notes) | API Integration Testing |
+| 10.1 LIVE DEMO 6 | the practice answer: v1 vs. the contract check | Test Doubles |
+| 10.2 LIVE DEMO 1, 2, 3 | repository; foreign-key line; `assert 3 == 5` | Database Integration Testing |
+| 10.2 TRY IT 1, LIVE DEMO 4 | predict, then run, the switch table | Database Integration Testing |
+| 10.2 LIVE DEMO 5, 8 | outages, timeouts; a timeout is an unknown | Service Integration Testing |
+| 10.2 LIVE DEMO 6 | loose stub vs. contract check | Test Doubles |
+| 10.2 TRY IT 2, 3 | a 201 without an `id`; the half-registered user | Practice Exercises (Exercises 5 and 4) |
+| 10.2 LIVE DEMO 7 | `pytest -m integration -rx` | Back in the Main Suite |
 
 **Two editions, one source.** The reading comes in two editions built
 from the same LaTeX file, with identical section numbering:
-- **Student edition** (26 pp.): `reading_materials/w09_integration_testing.pdf`,
+- **Student edition** (26 pp.): `reading_materials/w10_integration_testing.pdf`,
   the copy in the repository. Every section, concept, figure, exercise,
   and discussion question, with some explanations condensed and
   secondary listings, extra `curl` transcripts, and a few reference
@@ -46,8 +46,8 @@ from the same LaTeX file, with identical section numbering:
   step below uses something only the instructor edition prints, the
   step says so.
 
-To rebuild either edition: `tectonic -X compile w09_integration_testing.tex`
-(student) or `w09_integration_testing_instructor.tex` (instructor; a
+To rebuild either edition: `tectonic -X compile w10_integration_testing.tex`
+(student) or `w10_integration_testing_instructor.tex` (instructor; a
 two-line wrapper). Instructor-only text is wrapped in
 `\ifinstructor ... \else <student text> \fi`.
 
@@ -59,7 +59,7 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-You should see **75 passed, 3 xfailed, 1 failed**. That is Week 8's
+You should see **75 passed, 3 xfailed, 1 failed**. That is Weeks 8–9's
 72 / 2 / 1 plus `tests/integration/` (three passes and one new strict
 `xfail`):
 - `XFAIL`: `tests/billing/test_late_fees.py::test_calculate_late_fee[-4-0.0]`
@@ -72,7 +72,7 @@ You should see **75 passed, 3 xfailed, 1 failed**. That is Week 8's
   (a real defect integration testing found; see "Back in the Main
   Suite" below).
 
-`pytest -m "not integration"` reproduces Week 8's 72 / 2 / 1 exactly.
+`pytest -m "not integration"` reproduces the Weeks 8–9 result, 72 / 2 / 1, exactly.
 
 Most of the lecture runs inside the demo mini-project. **Its commands
 must be run from that folder**:
@@ -319,7 +319,7 @@ only, so say them aloud):
 ## Practice Exercises / Discussion Questions
 
 Intentionally **not** implemented in the repository, the same way
-Weeks 3–8 left their exercises. Hints:
+Weeks 3–9 left their exercises. Hints:
 - Exercise 3 (refunds): IT-R4 needs the fake to fail once and then
   succeed. Easiest is a counter in `create_provider()`, or a
   `responses` registry with a 503 followed by a 201, as in
@@ -355,6 +355,6 @@ root, confirm `pytest -v` is still at **75 passed, 3 xfailed, 1 failed**.
    up (`testpaths = tests` in `pytest.ini`). If a demo needs broken
    variants, consider `integration_testing/`'s environment-variable
    switch (`tests/variants.py`) instead of editing imports live.
-4. Week 10 (System Testing) can start from `demos/integration_testing/`
+4. Week 11 (System Testing) can start from `demos/integration_testing/`
    and `serve.py`: the shop already runs as a whole system over HTTP.
 5. Copy this file as a starting template for the next lecture's guide.

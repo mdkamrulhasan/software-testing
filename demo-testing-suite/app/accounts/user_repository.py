@@ -15,7 +15,7 @@ later lectures and the final project something concrete to build on:
   - The final project can add methods here (update_user, delete_user,
     list_users, ...) the same way this lecture added insert/get.
 
-Week 9 (integration testing) added create_schema(). Until then the
+Week 10 (integration testing) added create_schema(). Until then the
 `users` table was defined only inside a test fixture
 (tests/accounts/conftest.py), so the "real" schema existed nowhere in
 the application -- the kind of gap integration testing exposes. The

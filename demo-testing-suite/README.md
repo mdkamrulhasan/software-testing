@@ -21,10 +21,10 @@ Companion pieces:
 - `docs/DEMO_GUIDE_week07_coverage_based_testing.md` — the same, for
   Week 7 (Coverage-Based Testing with `coverage.py` and `pytest-cov`).
 - `docs/DEMO_GUIDE_week08_functional_testing.md` — the same, for
-  Week 8 (Functional Testing: decision tables, state transitions,
+  Weeks 8–9 (Functional Testing: decision tables, state transitions,
   pairwise, and property-based testing).
-- `docs/DEMO_GUIDE_week09_integration_testing.md` — the same, for
-  Week 9 (Integration Testing: strategies, design/API reviews, APIs,
+- `docs/DEMO_GUIDE_week10_integration_testing.md` — the same, for
+  Week 10 (Integration Testing: strategies, design/API reviews, APIs,
   databases, external services, and test doubles).
 - `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
   summaries of what changed in this codebase and why.
@@ -61,7 +61,7 @@ app/                    The "system under test" — grows one feature at a time
                                (classify_transaction, contains_negative)
   accounts/user_repository.py Week 2 — built for later
                                lectures (mocking, integration testing)
-                               and the final project to extend; Week 9
+                               and the final project to extend; Week 10
                                added create_schema(), the production
                                `users` schema (NOT NULL UNIQUE names)
   accounts/registration_service.py Week 4 — mocks UserRepository
@@ -77,7 +77,7 @@ app/                    The "system under test" — grows one feature at a time
 
 tests/                  The "real" growing suite — mirrors app/'s layout
   conftest.py               Project-wide fixtures (empty so far — see its docstring)
-  integration/              Week 9: tests that assemble REAL components
+  integration/              Week 10: tests that assemble REAL components
                              (UserRegistrationService + UserRepository +
                              a SQLite file); marked `integration`. The one
                              folder that does not mirror app/, because
@@ -129,13 +129,13 @@ demos/                  Deliberately isolated teaching examples — NOT
                              coverage.py and pytest-cov relate (shared
                              .coverage file, --append, xdist). Also run
                              from inside that folder.
-  functional_testing/       Week 8: a self-contained mini-project (its own
+  functional_testing/       Weeks 8–9: a self-contained mini-project (its own
                              shop/ and tests/) with the reading's decision
                              table, Order state machine, allpairspy rows,
                              and Hypothesis property -- plus the buggy
                              versions each technique catches. Run it from
                              inside that folder.
-  integration_testing/      Week 9: a self-contained mini-project (its own
+  integration_testing/      Week 10: a self-contained mini-project (its own
                              shop/, fakes/, specs/, tests/): a Flask API,
                              SQLite, and a fake third-party payment
                              provider over real HTTP; a written design/API
@@ -151,8 +151,8 @@ docs/
   DEMO_GUIDE_week05_mocking_coverage.md        Week 5, section-by-section
   DEMO_GUIDE_week06_data_flow.md               Week 6, section-by-section
   DEMO_GUIDE_week07_coverage_based_testing.md  Week 7, section-by-section
-  DEMO_GUIDE_week08_functional_testing.md      Week 8, section-by-section
-  DEMO_GUIDE_week09_integration_testing.md     Week 9, section-by-section
+  DEMO_GUIDE_week08_functional_testing.md      Weeks 8–9, section-by-section
+  DEMO_GUIDE_week10_integration_testing.md     Week 10, section-by-section
   CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
@@ -178,7 +178,7 @@ pytest --cov=app --cov-branch --cov-report=term-missing
 pytest --cov=app --cov-branch --cov-report=term-missing:skip-covered
 pytest --cov=app --cov-branch --cov-report=html     # htmlcov/index.html
 
-# Integration tests only, or everything but (Week 9) -- the
+# Integration tests only, or everything but (Week 10) -- the
 # `integration` marker is registered in pytest.ini.
 pytest -m integration
 pytest -m "not integration"
@@ -199,7 +199,7 @@ failed**:
   (the same Week 1 bug, documented the unittest way; this one is swept
   into the default run since `tests/legacy` is under `testpaths`).
 - `XFAIL` (strict) — `test_failed_welcome_email_does_not_leave_a_half_registered_user`
-  in `tests/integration/test_registration.py` (Week 9: `register()`
+  in `tests/integration/test_registration.py` (Week 10: `register()`
   commits the user before emailing, so a failed email leaves a user who
   was never welcomed and cannot retry; found by integration testing).
 
@@ -224,18 +224,18 @@ mini-project lives in `demos/coverage_reports/`, and a second one
 comparing `coverage.py` with `pytest-cov` (shared data file, `--append`,
 parallel `pytest-xdist` workers) lives in `demos/coverage_vs_pytest_cov/`.
 Both are outside the default run — see
-`docs/DEMO_GUIDE_week07_coverage_based_testing.md`. Week 8 adds nothing
+`docs/DEMO_GUIDE_week07_coverage_based_testing.md`. Weeks 8–9 add nothing
 to the default run, so the counts above are unchanged: its decision-table,
 state-transition, pairwise, and property-based examples (and the buggy
 versions they catch) live in `demos/functional_testing/` — see
-`docs/DEMO_GUIDE_week08_functional_testing.md`. Week 9 adds
+`docs/DEMO_GUIDE_week08_functional_testing.md`. Week 10 adds
 `tests/integration/` (three passing tests and the strict `xfail` above)
 and `create_schema()` in `app/accounts/user_repository.py`; `app/` stays
 at 100% branch coverage, and `pytest -m "not integration"` reproduces the
-Week 8 counts exactly. Its mini-project, with the reading's shop, its
+Weeks 8–9 counts exactly. Its mini-project, with the reading's shop, its
 specifications, its design review, and 46 tests, lives in
 `demos/integration_testing/` — see
-`docs/DEMO_GUIDE_week09_integration_testing.md`.
+`docs/DEMO_GUIDE_week10_integration_testing.md`.
 
 ## Extending this for the *next* lecture
 
@@ -253,11 +253,11 @@ specifications, its design review, and 46 tests, lives in
    `tests/integration/` instead, with `pytestmark = pytest.mark.integration`.
 3. If the lecture needs a dedicated, isolated illustration (like Week
    2's `scope_pitfall/`, Week 6's `data_flow/`, Week 7's
-   `coverage_reports/` and `coverage_vs_pytest_cov/`, Week 8's
-   `functional_testing/`, or Week 9's `integration_testing/`), add it under `demos/<short_topic_name>/` and
+   `coverage_reports/` and `coverage_vs_pytest_cov/`, Weeks 8–9's
+   `functional_testing/`, or Week 10's `integration_testing/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week09_integration_testing.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week10_integration_testing.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 

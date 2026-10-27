@@ -1,6 +1,6 @@
 """UserRegistrationService + the real UserRepository + real SQLite.
 
-Week 9 (integration testing). The Week 4 unit tests in
+Week 10 (integration testing). The Week 4 unit tests in
 tests/accounts/test_registration_service.py check the service's own
 decisions with a mocked repository. These check what only the
 assembled parts can show: that data is really committed, that the
@@ -54,12 +54,12 @@ class FailingEmailClient:
 
 @pytest.mark.xfail(
     strict=True,
-    reason="KNOWN ISSUE (Week 9): register() commits the user before sending "
+    reason="KNOWN ISSUE (Week 10): register() commits the user before sending "
            "the welcome email, with no compensation if the email fails. The "
            "user is left registered but never welcomed, and cannot retry: a "
            "second register() is rejected as a duplicate. Found by this "
            "integration test; a mocked repository has no committed state to "
-           "leave behind. Documented, not fixed -- see the Week 9 demo guide.",
+           "leave behind. Documented, not fixed -- see the Week 10 demo guide.",
 )
 def test_failed_welcome_email_does_not_leave_a_half_registered_user(connection, saved_names):
     service = UserRegistrationService(UserRepository(connection), FailingEmailClient())

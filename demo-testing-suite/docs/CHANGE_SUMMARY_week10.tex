@@ -73,7 +73,7 @@
 }
 
 \title{
-  \textbf{Codebase Change Summary --- Week 9}\\[4pt]
+  \textbf{Codebase Change Summary --- Week 10}\\[4pt]
   \large Integration Testing\\[2pt]
   \normalsize SE 413/513 --- Software Testing
 }
@@ -84,7 +84,7 @@
 \maketitle
 
 \begin{center}
-\textit{What changed in \path{demo-testing-suite/} since Week 8, and why}
+\textit{What changed in \path{demo-testing-suite/} since Weeks 8--9, and why}
 \end{center}
 
 \vspace{0.3cm}
@@ -95,16 +95,16 @@
 The \path{demo-testing-suite/} codebase is a single, shared project that
 grows one lecture at a time rather than being rebuilt from scratch each
 week. This document summarizes exactly what was added or changed for
-Week 9 and, more importantly, explains \emph{why} each change exists ---
-which concept from the Week 9 reading, \textit{Integration Testing:
+Week 10 and, more importantly, explains \emph{why} each change exists ---
+which concept from the Week 10 reading, \textit{Integration Testing:
 Testing How Components Work Together}, it demonstrates. Read this
-alongside the reading (\path{reading_materials/w09_integration_testing.pdf})
+alongside the reading (\path{reading_materials/w10_integration_testing.pdf})
 and \path{demo-testing-suite/README.md}. The reading prints the key code
 listings and summarizes the rest; every file it mentions is in
 \path{demos/integration_testing/}.
 
 \begin{keyidea}
-Nothing from Weeks 1--8 was removed. This week does two things. It adds
+Nothing from Weeks 1--9 was removed. This week does two things. It adds
 a self-contained project that runs every example in the reading: a
 small shop with an HTTP API, a database, and a (fake) third-party
 payment provider, its interface specifications, a written design
@@ -154,7 +154,7 @@ Run the shop for \texttt{curl}; every command with its expected output. \\
 \multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
 \texttt{requirements.txt} & Modified & Adds \texttt{flask},
 \texttt{requests}, and \texttt{responses}. \\
-\path{docs/DEMO_GUIDE_week09_integration_testing.md} & New &
+\path{docs/DEMO_GUIDE_week10_integration_testing.md} & New &
 Section-by-section lecture companion for the reading. \\
 \path{docs/DEMO_GUIDE_week04_tdd_test_doubles.md} & Modified & A
 forward note: the Week 4 registration service is now also
@@ -191,7 +191,7 @@ pytestmark = pytest.mark.integration
 pytest -m integration          # 3 passed, 75 deselected, 1 xfailed
 pytest -m "not integration"    # 1 failed, 72 passed, 4 deselected, 2 xfailed
 \end{lstlisting}
-The second line is exactly Week 8's result.
+The second line is exactly the Weeks 8--9 result.
 
 Writing these tests found two problems, both real:
 \begin{enumerate}
@@ -306,7 +306,7 @@ pip install -r requirements.txt
 pytest -v
 \end{lstlisting}
 you should now see \textbf{75 passed, 3 xfailed, 1 failed}: three more
-passing tests than Week 8, the same Week 1 and Week 3 non-passes as
+passing tests than Weeks 8--9, the same Week 1 and Week 3 non-passes as
 before, and the one new strict \texttt{xfail} described above. Every
 \path{app/} module is still at 100\% branch coverage.
 \path{demos/integration_testing/} is not part of that run
@@ -317,7 +317,7 @@ its folder.
 \section{How This Connects to the Reading}
 % ============================================================
 \begin{keyidea}
-Weeks 2--8 tested components one at a time. This week tests the
+Weeks 2--9 tested components one at a time. This week tests the
 promises between them: the formats, transactions, credentials, and
 failure behavior that two components must agree on. Both demo defects
 pass every unit test, and both real defects in the main suite were
