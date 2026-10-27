@@ -114,6 +114,15 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
+### Week 9 (Oct. 26): Integration Testing
+
+- **Reading:** [`w09_integration_testing.pdf`](reading_materials/w09_integration_testing.pdf)
+- **What changed:** [`CHANGE_SUMMARY_week09.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week09.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week09_integration_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week09_integration_testing.md)
+- **Reading's examples, runnable:** [`demo-testing-suite/demos/integration_testing/`](demo-testing-suite/demos/integration_testing/): a small shop with an HTTP API, a SQLite database, and a fake third-party payment provider; its API specifications and design review; and integration tests for each integration point (run from inside that folder)
+- **Main suite:** new [`tests/integration/`](demo-testing-suite/tests/integration/) folder and `integration` marker (`pytest -m integration`)
+- **New tooling:** `flask`, `requests`, and `responses` (run `pip install -r demo-testing-suite/requirements.txt`)
+
 ### Week 8 (Oct. 19): Functional Testing
 
 - **Reading:** [`w08_functional_testing.pdf`](reading_materials/w08_functional_testing.pdf)
@@ -150,6 +159,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 9 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week09.pdf) | [Integration testing](demo-testing-suite/docs/DEMO_GUIDE_week09_integration_testing.md) |
 | 8 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
 | 7 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf) | [Coverage-based testing](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md) |
 | 6 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf) | [Data-flow testing](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md) |
