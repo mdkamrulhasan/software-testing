@@ -28,3 +28,10 @@ hypothesis>=6.100
 # See demos/functional_testing/pairwise.py and
 # docs/DEMO_GUIDE_week08_functional_testing.md.
 allpairspy>=2.5
+# Week 9 (integration testing): the demo shop's HTTP API (Flask), its
+# client for the third-party payment provider (requests), and stubbing
+# that provider at the HTTP layer (responses). See
+# demos/integration_testing/README.md.
+flask>=3.0
+requests>=2.31
+responses>=0.25
