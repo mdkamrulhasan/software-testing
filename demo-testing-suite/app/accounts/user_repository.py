@@ -14,11 +14,27 @@ later lectures and the final project something concrete to build on:
     database without touching any test that only talks to UserRepository.
   - The final project can add methods here (update_user, delete_user,
     list_users, ...) the same way this lecture added insert/get.
+
+Week 10 (integration testing) added create_schema(). Until then the
+`users` table was defined only inside a test fixture
+(tests/accounts/conftest.py), so the "real" schema existed nowhere in
+the application -- the kind of gap integration testing exposes. The
+production schema also makes `name` NOT NULL UNIQUE, so the database
+enforces the no-duplicates rule even for code that bypasses
+UserRegistrationService. See tests/integration/.
 """
+
+SCHEMA = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE)"
+
+
+def create_schema(connection):
+    """Create the `users` table. Safe to call on a database that already has it."""
+    connection.execute(SCHEMA)
 
 
 class UserRepository:
-    """Wraps a sqlite3 connection that already has a `users` table."""
+    """Wraps a sqlite3 connection that already has a `users` table
+    (see create_schema())."""
 
     def __init__(self, connection):
         """Store the connection. The caller owns the connection's

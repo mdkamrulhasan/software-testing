@@ -1,6 +1,6 @@
 # Demo Guide — Functional Testing
 
-Companion to the Week 8 reading, *Functional Testing: Designing Tests
+Companion to the Weeks 8–9 reading, *Functional Testing: Designing Tests
 from the Specification*, and its slides
 (`lectures/F26/8.1_Functional_Testing.pdf`). Copied from
 `docs/DEMO_GUIDE_week07_coverage_based_testing.md`'s template, same
@@ -16,7 +16,7 @@ pip install -r requirements.txt
 pytest -v
 ```
 
-You should still see **72 passed, 2 xfailed, 1 failed**. Week 8 adds
+You should still see **72 passed, 2 xfailed, 1 failed**. Weeks 8–9 add
 nothing to the main suite (`app/` has no rule tables or state machines
 to apply this week's techniques to), so this is exactly Week 7's
 baseline:

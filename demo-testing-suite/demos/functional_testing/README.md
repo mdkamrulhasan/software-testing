@@ -1,6 +1,6 @@
-# Week 8 demo: functional testing
+# Weeks 8–9 demo: functional testing
 
-A self-contained mini-project for the Week 8 reading, *Functional
+A self-contained mini-project for the Weeks 8–9 reading, *Functional
 Testing: Designing Tests from the Specification*. Every listing and
 output in the reading comes from running these files with pytest 9.1,
 Hypothesis 6.170 and allpairspy 2.5. The layout is the reading's own

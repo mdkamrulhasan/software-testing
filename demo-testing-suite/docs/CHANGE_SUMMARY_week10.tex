@@ -1,0 +1,347 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+
+\title{
+  \textbf{Codebase Change Summary --- Week 10}\\[4pt]
+  \large Integration Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Weeks 8--9, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time rather than being rebuilt from scratch each
+week. This document summarizes exactly what was added or changed for
+Week 10 and, more importantly, explains \emph{why} each change exists ---
+which concept from the Week 10 reading, \textit{Integration Testing:
+Testing How Components Work Together}, it demonstrates. Read this
+alongside the reading (\path{reading_materials/w10_integration_testing.pdf})
+and \path{demo-testing-suite/README.md}. The reading prints the key code
+listings and summarizes the rest; every file it mentions is in
+\path{demos/integration_testing/}.
+
+\begin{keyidea}
+Nothing from Weeks 1--9 was removed. This week does two things. It adds
+a self-contained project that runs every example in the reading: a
+small shop with an HTTP API, a database, and a (fake) third-party
+payment provider, its interface specifications, a written design
+review, and two deliberately broken components. And it applies
+integration testing to the \emph{real} suite for the first time ---
+which found two real problems there.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{6.0cm}L{1.5cm}L{6.9cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The main suite}}\\
+\path{tests/integration/conftest.py} & New & Assembles
+\path{UserRegistrationService} from real parts: the real
+\path{UserRepository}, a SQLite file, and a fake email client. \\
+\path{tests/integration/test_registration.py} & New & Three passing
+integration tests, and one strict \texttt{xfail} documenting a defect
+they found. \\
+\path{app/accounts/user_repository.py} & Modified & Adds
+\path{create_schema()}: the production \texttt{users} schema, which
+until now existed only in a test fixture. \\
+\texttt{pytest.ini} & Modified & Registers the \texttt{integration}
+marker. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The reading's examples (not in the default run)}}\\
+\path{demos/integration_testing/shop/} & New & The shop: Flask API,
+order service, repository, SQLite schema, payment client. \\
+\path{demos/integration_testing/shop/payments_v1.py},
+\path{service_buggy.py} & New & Two broken components: a client that
+sends dollars instead of cents, and a service with a transaction bug. \\
+\path{demos/integration_testing/fakes/} & New & A fake payment provider
+that enforces the provider's contract, served over real HTTP. \\
+\path{demos/integration_testing/specs/} & New & Both API
+specifications, and the design/API review (findings R1--R11, each traced
+to its tests). \\
+\path{demos/integration_testing/tests/} & New & 46 tests: unit,
+bottom-up, top-down, stubbed, live, and fully assembled. \\
+\path{demos/integration_testing/serve.py}, \texttt{README.md} & New &
+Run the shop for \texttt{curl}; every command with its expected output. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Adds \texttt{flask},
+\texttt{requests}, and \texttt{responses}. \\
+\path{docs/DEMO_GUIDE_week10_integration_testing.md} & New &
+Section-by-section lecture companion for the reading. \\
+\path{docs/DEMO_GUIDE_week04_tdd_test_doubles.md} & Modified & A
+forward note: the Week 4 registration service is now also
+integration-tested. \\
+\texttt{README.md} (suite and repository) & Modified & Layout,
+commands, expected results, and the Weekly Updates index. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Install the new dependencies before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{Integration Testing Comes to the Main Suite}
+% ============================================================
+\textbf{Locations:} \path{tests/integration/},
+\path{app/accounts/user_repository.py}
+
+Since Week 4, \path{UserRegistrationService} has been tested with a
+\emph{mocked} \path{UserRepository}
+(\path{tests/accounts/test_registration_service.py}). Those tests are
+still there and still useful. The new folder tests the same service
+assembled from real parts, and every test in it is marked:
+\begin{lstlisting}
+pytestmark = pytest.mark.integration
+\end{lstlisting}
+\begin{lstlisting}[style=shellstyle]
+pytest -m integration          # 3 passed, 75 deselected, 1 xfailed
+pytest -m "not integration"    # 1 failed, 72 passed, 4 deselected, 2 xfailed
+\end{lstlisting}
+The second line is exactly the Weeks 8--9 result.
+
+Writing these tests found two problems, both real:
+\begin{enumerate}
+\item \textbf{The schema lived only in a test.} The \texttt{users} table
+had been created by a test fixture since Week 2, and nowhere in
+\path{app/}. An integration test has to use the application's own
+schema, so \path{create_schema()} now exists. It also makes
+\texttt{name} \texttt{NOT NULL UNIQUE}, so the database rejects a
+duplicate even from code that bypasses the service.
+\item \textbf{A half-registered user.} \path{register()} saves the user,
+\emph{then} sends the welcome email. If the mail server is down, the user
+is saved but never welcomed --- and cannot try again, because a second
+registration is rejected as a duplicate. A mocked repository has no
+saved state to leave behind, so no unit test could see it.
+\end{enumerate}
+
+\begin{warningbox}
+The second problem is documented with a strict \texttt{xfail}, not
+fixed --- the same way Week 1's late-fee bug and Week 3's shipping bug
+were. Fixing it is Exercise 4 in the reading. When you do,
+\texttt{strict=True} makes the test \emph{fail} (\texttt{XPASS(strict)})
+until you remove the marker.
+\end{warningbox}
+
+% ============================================================
+\section{The Reading's Shop, Runnable}
+% ============================================================
+\textbf{Location:} \path{demos/integration_testing/}. \textbf{Run its
+commands from inside the folder:}
+\begin{lstlisting}[style=shellstyle]
+cd demos/integration_testing
+pytest                         # 46 passed, in about a second
+\end{lstlisting}
+
+The shop has six integration points (IP1--IP6): client to API, API to
+service, service to repository, repository to SQLite, service to payment
+client, and payment client to the third-party provider over HTTP. Each
+test file makes a different set of them real:
+
+\begin{center}
+\small
+\begin{tabular}{@{}L{5.4cm}L{5.0cm}L{3.8cm}@{}}
+\toprule
+\textbf{Test file} & \textbf{What is real} & \textbf{Strategy step}\\
+\midrule
+\path{test_order_service_unit.py} & only the service (all mocked) & unit baseline\\
+\path{test_repository.py} & repository + SQLite & bottom-up (driver)\\
+\path{test_payments_stubbed.py} & client; provider stubbed (\texttt{responses}) & stub at HTTP\\
+\path{test_payments_live.py} & client + fake provider, real HTTP & bottom-up\\
+\path{test_order_service.py} & service + DB + fake provider & bottom-up, step 2\\
+\path{test_api_topdown.py} & API; service stubbed & top-down\\
+\path{test_api.py} & everything & assembled system\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Two broken components, one switch each}
+Environment variables swap in the deliberately broken versions, for one
+command only. The \emph{v1 client} sends \texttt{"12.50"} dollars instead
+of \texttt{1250} cents; the \emph{buggy service} commits the stock and the
+order in two separate transactions:
+\begin{lstlisting}[style=shellstyle]
+SHOP_PAYMENTS=v1   pytest tests/test_api.py
+SHOP_SERVICE=buggy pytest tests/test_order_service.py
+\end{lstlisting}
+\begin{center}
+\small
+\begin{tabular}{@{}L{4.9cm}L{1.8cm}L{2.3cm}L{5.4cm}@{}}
+\toprule
+\textbf{Run} & \textbf{v1 client} & \textbf{buggy service} & \textbf{What it shows}\\
+\midrule
+\path{test_order_service_unit.py} & 3 passed & 3 passed & mocks cannot see either defect\\
+\path{test_payments_stubbed.py} & 1 failed & 5 passed & the loose stub passes; the contract check fails\\
+\path{test_payments_live.py} & 3 failed & 6 passed & the provider answers \texttt{400}: ``integer number of cents''\\
+\path{test_order_service.py} & 2 failed & 1 failed & v1: charge rejected; buggy: \texttt{assert 3 == 5}, stock leaked\\
+\path{test_api.py} & 2 failed & 5 passed & \texttt{assert 502 == 201}: \emph{where}?\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Read the table by column. The dollars-for-cents defect is caught at
+every level from the contract check upward, but only the lower-level
+tests say \emph{where} it is. The transaction defect is caught at
+exactly one level --- the service against a real database --- and the
+end-to-end API tests miss it, because the API's input validation blocks
+the input that triggers it.
+
+\subsection*{The design review}
+\path{specs/design_review.md} records a review held before the tests
+were written: the integration points, the checklist, and eleven findings
+(R1--R11). Each finding names the tests that check it, and each of those
+tests names its finding in its docstring. That traceability is the
+pattern the reading asks you to follow in your semester project.
+
+\subsection*{Trying the API by hand}
+\begin{lstlisting}[style=shellstyle]
+python serve.py                    # shop on :8000, fake provider on :8001
+curl -i -X POST http://127.0.0.1:8000/orders -H 'X-API-Key: shop-key' \
+     -H 'Content-Type: application/json' \
+     -d '{"sku": "MUG", "quantity": 2, "customer_email": "ana@example.com"}'
+\end{lstlisting}
+returns \texttt{201 CREATED} with a \texttt{Location} header. The folder's
+\texttt{README.md} lists the 400, 401, 409, 402, and 503 variations.
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should now see \textbf{75 passed, 3 xfailed, 1 failed}: three more
+passing tests than Weeks 8--9, the same Week 1 and Week 3 non-passes as
+before, and the one new strict \texttt{xfail} described above. Every
+\path{app/} module is still at 100\% branch coverage.
+\path{demos/integration_testing/} is not part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run it from inside
+its folder.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Weeks 2--9 tested components one at a time. This week tests the
+promises between them: the formats, transactions, credentials, and
+failure behavior that two components must agree on. Both demo defects
+pass every unit test, and both real defects in the main suite were
+invisible to the Week 4 mocks. Each was found by connecting the real
+parts, or --- before that --- by reviewing the design.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Run the switch table above yourself, one cell at a time, and
+\emph{predict} each result before you run it.
+\item Before reading \path{specs/design_review.md}, review
+\path{specs/payment_provider_api.md} yourself with the reading's
+checklist. How many of R1--R11 did you find?
+\item Fix the half-registered user (Exercise 4). Decide between deleting
+the user when the email fails and saving it with a ``welcome pending''
+flag. Remove the \texttt{xfail} marker when your fix lands.
+\item Implement refunds in the demo (Exercise 3), writing the five
+IT-R test cases first.
+\item Find out what \path{PaymentClient.charge()} does when the provider
+returns \texttt{201} without an \texttt{id} (Exercise 5), and decide
+what it should do.
+\end{enumerate}
+
+\end{document}

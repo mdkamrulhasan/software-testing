@@ -78,15 +78,16 @@ By the end of this course, students should be able to:
 | 5 | Sept. 28 | Control-Flow Testing |
 | 6 | Oct. 5 | Data-Flow Testing and Coverage Concepts |
 | 7 | Oct. 12 | Coverage-Based Testing |
-| 8 | Oct. 19 | Functional Testing |
-| 9 | Oct. 26 | Integration Testing |
-| 10 | Nov. 2 | System Testing |
-| 11 | Nov. 9 | Acceptance Testing |
-| 12 | Nov. 16 | Project / Testing Workshop |
+| 8–9 | Oct. 19 – Oct. 26 | Functional Testing (spans two weeks; Week 9 has fall break) |
+| 10 | Nov. 2 | Integration Testing |
+| 11 | Nov. 9 | System Testing |
+| 12 | Nov. 16 | Acceptance Testing |
 | 13 | Nov. 23 | Continuous Testing |
 | 14 | Nov. 30 | Advanced Testing, Emerging Techniques, and AI-Assisted Testing |
 | 15 | Dec. 7 | Project Presentation |
 | 16 | Dec. 14 | Exam & Final Evaluation Week |
+
+> **Schedule change (Oct. 2026):** Functional Testing ran over into Week 9, which also had fall break (about half the usual classes), so it now covers Weeks 8–9. Each later topic moves back one week, and the separate Project / Testing Workshop week has been absorbed.
 
 ---
 
@@ -114,7 +115,17 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
-### Week 8 (Oct. 19): Functional Testing
+### Week 10 (Nov. 2): Integration Testing
+
+- **Reading:** [`w10_integration_testing.pdf`](reading_materials/w10_integration_testing.pdf) (student edition; the code it summarizes is in the demo folder below)
+- **Slides:** [`10.1_Integration_Testing_I.pdf`](lectures/F26/10.1_Integration_Testing_I.pdf) (strategies, reviews, APIs), [`10.2_Integration_Testing_II.pdf`](lectures/F26/10.2_Integration_Testing_II.pdf) (databases, services, doubles, automation)
+- **What changed:** [`CHANGE_SUMMARY_week10.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week10.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week10_integration_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week10_integration_testing.md)
+- **Reading's examples, runnable:** [`demo-testing-suite/demos/integration_testing/`](demo-testing-suite/demos/integration_testing/): a small shop with an HTTP API, a SQLite database, and a fake third-party payment provider; its API specifications and design review; and integration tests for each integration point (run from inside that folder)
+- **Main suite:** new [`tests/integration/`](demo-testing-suite/tests/integration/) folder and `integration` marker (`pytest -m integration`)
+- **New tooling:** `flask`, `requests`, and `responses` (run `pip install -r demo-testing-suite/requirements.txt`)
+
+### Weeks 8–9 (Oct. 19 – Oct. 26): Functional Testing
 
 - **Reading:** [`w08_functional_testing.pdf`](reading_materials/w08_functional_testing.pdf)
 - **Slides:** [`8.1_Functional_Testing.pdf`](lectures/F26/8.1_Functional_Testing.pdf)
@@ -150,7 +161,8 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
-| 8 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
+| 10 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week10.pdf) | [Integration testing](demo-testing-suite/docs/DEMO_GUIDE_week10_integration_testing.md) |
+| 8–9 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
 | 7 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf) | [Coverage-based testing](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md) |
 | 6 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week06.pdf) | [Data-flow testing](demo-testing-suite/docs/DEMO_GUIDE_week06_data_flow.md) |
 | 5 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week05.pdf) | [Mocking & coverage](demo-testing-suite/docs/DEMO_GUIDE_week05_mocking_coverage.md) |

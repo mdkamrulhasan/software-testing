@@ -150,6 +150,14 @@ dependency, contrasted with `tests/accounts/test_user_repository.py`,
 which still exercises a real `:memory:` connection because *that* file
 is testing `UserRepository` itself, not one of its callers.
 
+*Update (Week 10):* the same service is now also tested with the *real*
+`UserRepository` on a real SQLite file, in
+`tests/integration/test_registration.py`. Those tests found what these
+mocks cannot: a failed welcome email leaves a half-registered user
+(documented there as a strict `xfail`). Both files are worth keeping.
+They answer different questions. See
+`docs/DEMO_GUIDE_week10_integration_testing.md`.
+
 ## State Verification vs. Behavior Verification / Classical vs. Mockist Schools
 
 No new file — discussion, using `test_fake_database_stores_and_retrieves_a_user`
