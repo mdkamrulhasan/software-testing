@@ -42,11 +42,12 @@ def test_ten_customers_race_for_the_last_five_mugs(shop):
     bodies = [{"sku": "MUG", "quantity": 1, "customer_email": f"c{i}@example.com"}
               for i in range(10)]
 
-    statuses = sorted(status for status, _ in order_all_at_once(shop, bodies))
+    statuses = [status for status, _ in order_all_at_once(shop, bodies)]
 
-    assert statuses == [201] * 5 + [409] * 5
-    assert shop.stock("MUG") == 0
-    assert len(shop.charges()) == 5            # 5 mugs, 5 charges
+    sold, refused = statuses.count(201), statuses.count(409)
+    outcome = {"sold": sold, "refused": refused,
+               "stock_left": shop.stock("MUG"), "cards_charged": len(shop.charges())}
+    assert outcome == {"sold": 5, "refused": 5, "stock_left": 0, "cards_charged": 5}
 
 
 def test_ten_simultaneous_orders_each_answered_within_a_second(shop):

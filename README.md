@@ -80,8 +80,8 @@ By the end of this course, students should be able to:
 | 7 | Oct. 12 | Coverage-Based Testing |
 | 8–9 | Oct. 19 – Oct. 26 | Functional Testing (spans two weeks; Week 9 has fall break) |
 | 10 | Nov. 2 | Integration Testing |
-| 11 | Nov. 9 | System Testing |
-| 12 | Nov. 16 | Acceptance Testing |
+| 11 | Nov. 9 | System Testing and Acceptance Testing |
+| 12 | Nov. 16 | *To be announced* (Acceptance Testing moved to Week 11) |
 | 13 | Nov. 23 | Continuous Testing |
 | 14 | Nov. 30 | Advanced Testing, Emerging Techniques, and AI-Assisted Testing |
 | 15 | Dec. 7 | Project Presentation |
@@ -114,6 +114,14 @@ The organization and contents of the repository may evolve throughout the semest
 ## Weekly Updates
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
+
+### Week 11 (Nov. 9): System Testing and Acceptance Testing
+
+- **Readings:** [`w11_system_testing.pdf`](reading_materials/w11_system_testing.pdf), [`w11_acceptance_testing.pdf`](reading_materials/w11_acceptance_testing.pdf) (student editions; the code they summarize is in the demo folder below)
+- **What changed:** [`CHANGE_SUMMARY_week11.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week11.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week11_system_acceptance_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week11_system_acceptance_testing.md)
+- **Readings' examples, runnable:** [`demo-testing-suite/demos/system_acceptance_testing/`](demo-testing-suite/demos/system_acceptance_testing/): Week 10's shop as a system that runs on its own; its system requirements, system test plan, and user stories; system tests that start it as a separate process (scenarios, hostile input, concurrency, performance, recovery); and acceptance scenarios in Gherkin (run from inside that folder)
+- **New tooling:** `pytest-bdd` (run `pip install -r demo-testing-suite/requirements.txt`)
 
 ### Week 10 (Nov. 2): Integration Testing
 
@@ -161,6 +169,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 11 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week11.pdf) | [System & acceptance testing](demo-testing-suite/docs/DEMO_GUIDE_week11_system_acceptance_testing.md) |
 | 10 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week10.pdf) | [Integration testing](demo-testing-suite/docs/DEMO_GUIDE_week10_integration_testing.md) |
 | 8–9 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
 | 7 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week07.pdf) | [Coverage-based testing](demo-testing-suite/docs/DEMO_GUIDE_week07_coverage_based_testing.md) |
