@@ -1,0 +1,18 @@
+[project]
+name = "se413-513-assignment-3"
+version = "0.1.0"
+description = "SE 413/513 Assignment 3 -- Integration and System Testing (starter code)"
+requires-python = ">=3.9"
+dependencies = ["pytest>=7.4", "flask>=3.0", "requests>=2.31"]
+
+[tool.pytest.ini_options]
+# Lets tests `import repository`, `import service`, ... directly.
+pythonpath = ["src"]
+testpaths = ["tests"]
+# A strict xfail that unexpectedly passes is reported as a FAILURE.
+xfail_strict = true
+
+markers = [
+    "integration: tests that assemble real components inside the test process",
+    "system: tests that run serve.py as a separate process and use only HTTP",
+]
