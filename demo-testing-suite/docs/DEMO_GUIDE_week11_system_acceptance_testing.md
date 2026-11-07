@@ -13,8 +13,8 @@ natural slide boundaries if decks are made later (suggested split: one
 **Two editions, one source.** Like Week 10, each reading comes in two
 editions built from the same LaTeX file, with identical section
 numbering:
-- **Student editions:** `reading_materials/w11_system_testing.pdf` and
-  `reading_materials/w11_acceptance_testing.pdf`, the copies in the
+- **Student editions:** `reading_materials/w11.1_system_testing.pdf` and
+  `reading_materials/w11.2_acceptance_testing.pdf`, the copies in the
   repository. Every section, concept, figure, exercise, and discussion
   question, with a few secondary listings omitted (the student finds
   them in the demo folder).
@@ -24,10 +24,13 @@ numbering:
   on every practice exercise. **Not in the repository**, because the
   repository is public; they are kept with the LaTeX source.
 
-To rebuild: `pdflatex w11_system_testing.tex` (student) or
-`pdflatex w11_system_testing_instructor.tex` (instructor; a two-line
-wrapper that sets `\instructortrue` and `\input`s the reading). Run
-twice for the table of contents. Instructor-only text is wrapped in
+To rebuild: `pdflatex w11.1_system_testing.tex` (student) or
+`pdflatex w11.1_system_testing_instructor.tex` (instructor; a two-line
+wrapper that sets `\instructortrue` and `\input`s the reading); the same
+for `w11.2_acceptance_testing`. Run `pdflatex` **three times** on a fresh
+build: the table of contents fills two pages, so the second pass still
+shifts the page numbers it lists. (`latexmk -pdf` or `tectonic` rerun as
+needed on their own.) Instructor-only text is wrapped in
 `\ifinstructor ... \fi`.
 
 **Before class:** reinstall requirements (this week adds `pytest-bdd`)

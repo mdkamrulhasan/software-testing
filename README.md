@@ -117,7 +117,7 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 ### Week 11 (Nov. 9): System Testing and Acceptance Testing
 
-- **Readings:** [`w11_system_testing.pdf`](reading_materials/w11_system_testing.pdf), [`w11_acceptance_testing.pdf`](reading_materials/w11_acceptance_testing.pdf) (student editions; the code they summarize is in the demo folder below)
+- **Readings:** [`w11.1_system_testing.pdf`](reading_materials/w11.1_system_testing.pdf), [`w11.2_acceptance_testing.pdf`](reading_materials/w11.2_acceptance_testing.pdf) (student editions; the code they summarize is in the demo folder below)
 - **What changed:** [`CHANGE_SUMMARY_week11.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week11.pdf)
 - **Demo guide:** [`DEMO_GUIDE_week11_system_acceptance_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week11_system_acceptance_testing.md)
 - **Readings' examples, runnable:** [`demo-testing-suite/demos/system_acceptance_testing/`](demo-testing-suite/demos/system_acceptance_testing/): Week 10's shop as a system that runs on its own; its system requirements, system test plan, and user stories; system tests that start it as a separate process (scenarios, hostile input, concurrency, performance, recovery); and acceptance scenarios in Gherkin (run from inside that folder)
