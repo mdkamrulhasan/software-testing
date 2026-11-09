@@ -35,3 +35,7 @@ allpairspy>=2.5
 flask>=3.0
 requests>=2.31
 responses>=0.25
+# Week 11 (acceptance testing): user stories' acceptance criteria as
+# Gherkin .feature files (Given/When/Then), run by pytest. See
+# demos/system_acceptance_testing/tests/acceptance/.
+pytest-bdd>=8.0

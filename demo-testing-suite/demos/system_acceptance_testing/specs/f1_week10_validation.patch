@@ -1,0 +1,25 @@
+--- a/shop/api.py
++++ b/shop/api.py
+@@ -72,9 +72,6 @@
+     def json_errors(exc):  # Flask's defaults are HTML pages
+         return error(exc.code, exc.name.lower())
+ 
+-    @app.errorhandler(500)
+-    def internal_error(exc):  # SYS-7: never an HTML page or a stack trace
+-        return error(500, "internal error")
+ 
+     return app
+ 
+@@ -86,10 +83,8 @@
+     missing = [f for f in ("sku", "quantity", "customer_email") if f not in body]
+     if missing:
+         return f"missing field(s): {', '.join(missing)}"
+-    if not isinstance(body["sku"], str):                      # Week 11, finding F1
+-        return "sku must be a string"
+-    if type(body["quantity"]) is not int or not 1 <= body["quantity"] <= MAX_QUANTITY:
+-        return f"quantity must be an integer from 1 to {MAX_QUANTITY}"  # Week 11, F1
++    if type(body["quantity"]) is not int or body["quantity"] < 1:
++        return "quantity must be a positive integer"
+     if not isinstance(body["customer_email"], str) or "@" not in body["customer_email"]:
+         return "customer_email must be an email address"
+     if "coupon" in body and not isinstance(body["coupon"], str):

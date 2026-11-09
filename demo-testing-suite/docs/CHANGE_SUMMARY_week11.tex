@@ -1,0 +1,295 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+\title{
+  \textbf{Codebase Change Summary --- Week 11}\\[4pt]
+  \large System Testing and Acceptance Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 10, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time. This document summarizes what was added or
+changed for Week 11 and explains \emph{why} each change exists --- which
+concept from the two Week 11 readings, \textit{System Testing: Testing
+the Whole System from the Outside} and \textit{Acceptance Testing:
+Building the Right Thing}, it demonstrates. Read it alongside the
+readings (\path{reading_materials/w11.1_system_testing.pdf},
+\path{reading_materials/w11.2_acceptance_testing.pdf}) and
+\path{demos/system_acceptance_testing/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--10 was removed or changed in behavior. This week
+adds one self-contained project for both readings: Week 10's shop,
+grown into a system that runs on its own and is tested from the outside
+--- as a separate server process, over HTTP only --- at two new levels.
+System tests check it against its system requirements; acceptance
+tests, written in Gherkin, check it against its user stories. Writing
+the system tests found a real defect, present in Week 10's shop too.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{6.0cm}L{1.5cm}L{6.9cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The readings' system (not in the default run)}}\\
+\path{demos/system_acceptance_testing/shop/} & New & Week 10's shop
+plus \path{GET /health}, \path{GET /products}, coupon codes
+(\path{pricing.py}), stricter input validation, and a JSON \texttt{500}
+handler. \\
+\path{shop/service_racy.py}, \path{shop/pricing_per_unit.py} & New &
+Two deliberately defective components: one oversells under concurrency;
+one misreads the coupon story. \\
+\path{serve.py}, \path{variants.py} & New & Run the shop as one system
+(\texttt{--port 0}, \texttt{--db}, \texttt{--seed}); switch defective
+components in by environment variable, also inside the server process. \\
+\path{fakes/payment_provider.py} & New (copy) & Week 10's fake PayFast,
+plus test-only \path{/_test/config} and \path{/_test/charges}. \\
+\path{specs/} & New & System requirements, a one-page system test plan,
+user stories with acceptance criteria, the API contract v1.1, and the
+patch that reproduces finding F1. \\
+\path{tests/conftest.py} & New & The system test harness: starts
+\path{serve.py} as a subprocess and talks to it over HTTP. \\
+\path{tests/system/} & New & 23 system tests: scenarios, hostile input,
+access control, concurrency, performance, recovery. \\
+\path{tests/acceptance/} & New & 3 \texttt{.feature} files, their step
+definitions, and 14 scenarios run by \texttt{pytest-bdd}. \\
+\path{tests/unit/}, \path{tests/integration/} & New & The developer's
+pricing tests, and Week 10's integration harness carried over: the
+levels below, for comparison. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Tooling and documentation}}\\
+\texttt{requirements.txt} & Modified & Adds \texttt{pytest-bdd}. \\
+\texttt{pytest.ini} & Modified & Registers the \texttt{system} and
+\texttt{acceptance} markers. \\
+\path{docs/DEMO_GUIDE_week11_system_acceptance_testing.md} & New &
+Section-by-section lecture companion for both readings. \\
+\texttt{README.md} (suite and repository) & Modified & Layout, the
+Week 11 entry, and the schedule. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+Install the new dependency before running anything this week:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{The Readings' System, Runnable}
+% ============================================================
+\textbf{Location:} \path{demos/system_acceptance_testing/}. \textbf{Run
+its commands from inside the folder:}
+\begin{lstlisting}[style=shellstyle]
+cd demos/system_acceptance_testing
+pytest                         # 58 passed, in about ten seconds
+\end{lstlisting}
+
+\path{demos/integration_testing/} is unchanged: the Week 10 reading
+quotes it line by line. The new folder started as a copy of it.
+
+\begin{center}
+\small
+\begin{tabular}{@{}L{3.6cm}L{4.6cm}L{4.4cm}r@{}}
+\toprule
+\textbf{Folder} & \textbf{Level} & \textbf{How the shop runs} & \textbf{Tests}\\
+\midrule
+\path{tests/unit/} & unit (the developer's tests) & not at all & 8\\
+\path{tests/integration/} & integration (Week 10's) & inside the test process & 13\\
+\path{tests/system/} & system & separate process, HTTP only & 23\\
+\path{tests/acceptance/} & acceptance (Gherkin) & separate process, HTTP only & 14\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Two defective components, one switch each}
+\begin{lstlisting}[style=shellstyle]
+SHOP_SERVICE=racy       pytest tests/system
+SHOP_COUPONS=per_unit   pytest tests/acceptance
+\end{lstlisting}
+\begin{center}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& \textbf{unit} & \textbf{integration} & \textbf{system} & \textbf{acceptance}\\
+\midrule
+\texttt{SHOP\_SERVICE=racy} & 8 passed & 13 passed & \textbf{1 failed} & 14 passed\\
+\texttt{SHOP\_COUPONS=per\_unit} & 8 passed & 13 passed & 23 passed & \textbf{2 failed}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each defect is caught at exactly one level. The \emph{racy service}
+charges the card before taking the stock, from a value it read before
+the charge: with ten simultaneous customers it sells ten of five mugs
+and leaves the stock at four. Only a test that runs the real,
+multi-threaded server can see it. The \emph{per-unit pricing} reads
+``FLAT5: \$5 off orders over \$10'' as ``\$5 off each unit over \$10''.
+The developer's own tests order one unit, where both readings agree;
+only the examples agreed with the product owner (two mugs; four
+stickers) catch it.
+
+% ============================================================
+\section{A Real Finding: Hostile Input (F1)}
+% ============================================================
+When the system tests were first run against Week 10's input
+validation, two hostile requests --- a \texttt{sku} sent as a JSON list,
+and a \texttt{quantity} of $10^{30}$ --- crashed the request inside
+SQLite, and Flask answered with its default \emph{HTML} \texttt{500}
+page. That breaks the shop's own API contract (``every error response
+is JSON\ldots never an HTML page''). It is present in
+\path{demos/integration_testing/} as well; that folder is left as the
+Week 10 reading printed it.
+
+The fix needed a requirement that did not exist: the product owner set
+a maximum of 100 units per order. \path{validate_order()} now checks
+that \texttt{sku} is a string and \texttt{quantity} is 1--100, and a
+JSON handler covers any \texttt{500}. To see the failure again:
+\begin{lstlisting}[style=shellstyle]
+patch -p1 < specs/f1_week10_validation.patch
+pytest tests/system/test_robustness_and_security.py     # 2 failed
+patch -R -p1 < specs/f1_week10_validation.patch
+\end{lstlisting}
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+pytest -v
+\end{lstlisting}
+you should still see \textbf{75 passed, 3 xfailed, 1 failed}, exactly
+Week 10's result: nothing in \path{app/} or \path{tests/} changed this
+week. \path{demos/system_acceptance_testing/} is not part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}); run it from inside
+its folder.
+
+\begin{warningbox}
+\textbf{Why the main suite gets no system tests this week.}
+\path{app/} is a library of modules, not a program that runs on its
+own: there is no system to start. System and acceptance testing need a
+deployable system, which is why both readings use the shop. Your
+semester project, which is a runnable system, is where you apply them.
+\end{warningbox}
+
+% ============================================================
+\section{How This Connects to the Readings}
+% ============================================================
+\begin{keyidea}
+Weeks 2--10 tested the system's parts and the promises between them.
+Week 11 tests the whole: first against the team's specification, as a
+customer, operator, or attacker would meet it (system testing); then
+against what the customer actually meant (acceptance testing). Each
+level found a defect every level below it passed.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Run the switch table above yourself, one cell at a time, and
+\emph{predict} each result first.
+\item Read \path{shop/service_racy.py} and find the defect before running
+the system tests against it.
+\item Before reading \path{specs/user_stories.md}'s three-amigos notes,
+write down what you think 2 mugs with FLAT5 should cost.
+\item Implement restocking (System Testing, Exercise 6) and order
+history (Acceptance Testing, Exercise 6), tests first.
+\item Write a system test plan and three Gherkin scenarios for your
+semester project.
+\end{enumerate}
+
+\end{document}
