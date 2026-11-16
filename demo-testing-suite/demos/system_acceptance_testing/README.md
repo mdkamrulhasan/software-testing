@@ -49,9 +49,9 @@ pip install -r ../../requirements.txt     # adds pytest-bdd this week
 | `tests/unit/` | unit (the developer's `price_order` tests) | not at all | 8 |
 | `tests/integration/` | integration (Week 10's harness, carried over) | assembled inside the test process | 13 |
 | `tests/system/` | system | **separate process**, HTTP only | 23 |
-| `tests/acceptance/` | acceptance (Gherkin, pytest-bdd) | **separate process**, HTTP only | 14 |
+| `tests/acceptance/` | acceptance (Gherkin, pytest-bdd; plus `test_browse_products_plain.py` in regular pytest) | **separate process**, HTTP only | 16 |
 
-A plain `pytest` in this folder reports **58 passed**, in about ten
+A plain `pytest` in this folder reports **60 passed**, in about ten
 seconds: each system and acceptance test starts its own server.
 `pytest -m system` and `pytest -m acceptance` select one level.
 
@@ -60,7 +60,7 @@ seconds: each system and acceptance test starts its own server.
 ```bash
 pytest tests/unit tests/integration -q        # 21 passed: the levels below
 pytest tests/system -v                        # 23 passed
-pytest tests/acceptance -v                    # 14 passed
+pytest tests/acceptance -v                    # 16 passed
 ```
 
 ### Each defect is found at exactly one level
@@ -68,7 +68,7 @@ pytest tests/acceptance -v                    # 14 passed
 ```bash
 SHOP_SERVICE=racy pytest tests/unit tests/integration   # 21 passed
 SHOP_SERVICE=racy pytest tests/system                   # 1 failed: the race for the last five mugs
-SHOP_SERVICE=racy pytest tests/acceptance               # 14 passed
+SHOP_SERVICE=racy pytest tests/acceptance               # 16 passed
 
 SHOP_COUPONS=per_unit pytest tests/unit tests/integration  # 21 passed
 SHOP_COUPONS=per_unit pytest tests/system                  # 23 passed
