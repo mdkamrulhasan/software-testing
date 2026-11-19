@@ -86,6 +86,8 @@ class PerRequestService:
         return self._call("list_products")
 
     def health(self):
+        # import time
+        # time.sleep(10)
         return self._call("health")
 
 
