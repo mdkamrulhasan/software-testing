@@ -30,6 +30,12 @@ Companion pieces:
   Week 11 (System Testing and Acceptance Testing: the shop run as a
   separate process; concurrency, performance, security, recovery;
   user stories, Gherkin, and `pytest-bdd`).
+- `docs/DEMO_GUIDE_week13_continuous_testing.md` — the same, for
+  Week 13 (Continuous Testing: the shop's pipeline, locally and in
+  GitHub Actions; quality gates; parallel and flaky tests).
+- `docs/DEMO_GUIDE_week14_advanced_ai_testing.md` — the same, for
+  Week 14 (Advanced Testing, Emerging Techniques, and AI-Assisted
+  Testing: contract testing; AI-generated tests, measured).
 - `docs/CHANGE_SUMMARY_weekNN.pdf` — student-facing, week-by-week
   summaries of what changed in this codebase and why.
 - `final_project/README.md` — how the final project is meant to build
@@ -156,6 +162,15 @@ demos/                  Deliberately isolated teaching examples — NOT
                              (SHOP_SERVICE=racy / SHOP_COUPONS=per_unit),
                              each caught at exactly one level. Run it
                              from inside that folder.
+  continuous_advanced_testing/ Weeks 13-14: Week 11's shop with a
+                             pipeline (pipeline.py; also run by
+                             .github/workflows/shop-pipeline.yml), a
+                             shop-PayFast contract checked from both sides,
+                             deliberately flaky tests, and two AI-generated
+                             test suites with an evaluator. A third
+                             defective component (SHOP_PAYMENTS=no_idempotency)
+                             is caught only by the contract. Run it from
+                             inside that folder.
 
 docs/
   DEMO_GUIDE_week02_pytest_fixtures.md         Week 2, slide-by-slide
@@ -167,6 +182,8 @@ docs/
   DEMO_GUIDE_week08_functional_testing.md      Weeks 8–9, section-by-section
   DEMO_GUIDE_week10_integration_testing.md     Week 10, section-by-section
   DEMO_GUIDE_week11_system_acceptance_testing.md  Week 11, section-by-section
+  DEMO_GUIDE_week13_continuous_testing.md     Week 13, section-by-section
+  DEMO_GUIDE_week14_advanced_ai_testing.md    Week 14, section-by-section
   CHANGE_SUMMARY_week0N.tex / .pdf             Student-facing change summaries
 
 final_project/          Scaffold + a stated working assumption — read
@@ -254,7 +271,12 @@ the default run (only two markers in `pytest.ini` and `pytest-bdd` in
 `requirements.txt`), so the counts above are unchanged; its system and
 acceptance tests, and the shop they run, live in
 `demos/system_acceptance_testing/` — see
-`docs/DEMO_GUIDE_week11_system_acceptance_testing.md`.
+`docs/DEMO_GUIDE_week11_system_acceptance_testing.md`. Weeks 13–14 add
+only a `contract` marker to `pytest.ini`; the counts above are
+unchanged. Their pipeline, contract tests, flaky examples, and
+AI-generated suites live in `demos/continuous_advanced_testing/` — see
+`docs/DEMO_GUIDE_week13_continuous_testing.md` and
+`docs/DEMO_GUIDE_week14_advanced_ai_testing.md`.
 
 ## Extending this for the *next* lecture
 
@@ -273,11 +295,11 @@ acceptance tests, and the shop they run, live in
 3. If the lecture needs a dedicated, isolated illustration (like Week
    2's `scope_pitfall/`, Week 6's `data_flow/`, Week 7's
    `coverage_reports/` and `coverage_vs_pytest_cov/`, Weeks 8–9's
-   `functional_testing/`, Week 10's `integration_testing/`, or Week 11's
-   `system_acceptance_testing/`), add it under `demos/<short_topic_name>/` and
+   `functional_testing/`, Week 10's `integration_testing/`, Week 11's
+   `system_acceptance_testing/`, or Weeks 13–14's `continuous_advanced_testing/`), add it under `demos/<short_topic_name>/` and
    keep it out of `tests/` so a plain `pytest` doesn't pick it up (it's
    already excluded by `testpaths = tests` in `pytest.ini`).
-4. Copy `docs/DEMO_GUIDE_week11_system_acceptance_testing.md` as a starting
+4. Copy `docs/DEMO_GUIDE_week13_continuous_testing.md` as a starting
    template for the new lecture's guide — same shape, new section names
    and file paths.
 

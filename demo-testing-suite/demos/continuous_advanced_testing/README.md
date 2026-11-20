@@ -1,118 +1,166 @@
-# Week 11 demo: system testing and acceptance testing
+# Weeks 13–14 demo: continuous testing, contract testing, AI-assisted testing
 
-A self-contained mini-project for the two Week 11 readings, *System
-Testing: Testing the Whole System from the Outside* and *Acceptance
-Testing: Building the Right Thing*. It is Week 10's shop
-(`../integration_testing/`), grown into a system that runs on its own:
-a health check, a product catalog, coupon codes, a database that
-survives restarts, and a `serve.py` that the tests start as a separate
-process. Every listing and output in the readings comes from running
-these files with pytest 9.1, pytest-bdd 9.0, Flask 3.1, and requests
-2.34.
+A self-contained mini-project for two readings, *Continuous Testing:
+Every Change, Every Time* (Week 13) and *Advanced Testing, Emerging
+Techniques, and AI-Assisted Testing* (Week 14). It is Week 11's shop
+(`../system_acceptance_testing/`), now with:
 
-Week 10's folder is unchanged: its reading quotes it line by line.
+- a **pipeline** (`pipeline.py`) that runs every test level in order,
+  cheapest first, on your machine and in GitHub Actions
+  (`.github/workflows/shop-pipeline.yml` at the repository root);
+- a **consumer-driven contract** between the shop and PayFast
+  (`contracts/`, `tests/contract/`);
+- two **deliberately flaky tests** and a rerun tool (`flaky_examples/`,
+  `tools/rerun.py`);
+- two **AI-generated test suites**, their prompts, and an evaluator
+  (`ai_generated/`).
+
+Every listing and output in the readings comes from running these files
+with Python 3.13, pytest 9.1, pytest-xdist 3.8, pytest-cov 7.1 (coverage
+7.17), pytest-bdd 9.0, Flask 3.1, and requests 2.34. Week 11's folder is
+unchanged: its readings quote it line by line.
 
 **Run every command from this folder**, not from `demo-testing-suite/`:
 
 ```bash
-cd demos/system_acceptance_testing
-pip install -r ../../requirements.txt     # adds pytest-bdd this week
+cd demos/continuous_advanced_testing
+pip install -r ../../requirements.txt
 ```
 
-```
-                      ┌──────────────────── the system under test ─────────────────────┐
- test process         │                                                                 │
- (requests) ──HTTP──► │ serve.py: api.py ─► OrderService ─► OrderRepository ─► shop.db  │
-     │                │                          │                                      │
-     │                │                          └──► PaymentClient ──HTTP──┐           │
-     │                └─────────────────────────────────────────────────────┼───────────┘
-     └──── /_test/config, /_test/charges (test environment only) ──────► fake PayFast
-```
+A plain `pytest` here reports **67 passed** (Week 11's 60, plus 7
+contract tests). The flaky examples and the AI-generated suites are not
+collected by default (their file names do not start with `test_`); run
+them by path.
+
+## What is new since Week 11
 
 | File | What it is |
 |---|---|
-| `specs/system_requirements.md` | SYS-1..9, NFR-1..3: the **system test basis** |
-| `specs/system_test_plan.md` | Scope, environment, approach, entry/exit criteria, traceability, risks, findings |
-| `specs/user_stories.md` | US-1..3 and their acceptance criteria: the **acceptance test basis** |
-| `specs/shop_api.md` | The API contract, v1.1 |
-| `specs/payment_provider_api.md` | PayFast's contract (unchanged from Week 10) |
-| `specs/f1_week10_validation.patch` | Puts back Week 10's input validation, to reproduce finding F1 |
-| `serve.py` | Runs the shop as one system; prints `READY shop=... provider=...` |
-| `variants.py` | Picks correct or defective components from environment variables |
-| `shop/pricing.py` | Coupons (US-3) |
-| `shop/pricing_per_unit.py` | **Defective:** FLAT5 read as "$5 off each unit" |
-| `shop/service_racy.py` | **Defective:** charges first, takes the stock after, from a stale read |
-| `fakes/payment_provider.py` | Week 10's fake PayFast, plus test-only `/_test/` controls |
+| `pipeline.py` | The pipeline: `static`, `unit`, `integration` (with an 80% coverage gate), `contract`, `system`, `acceptance`. Stops at the first failing stage. |
+| `.coveragerc` | Coverage of `shop/` only, without the defective variants; also measures the shop inside the server processes the system tests start. |
+| `contracts/shop-payfast.json` | What the shop sends PayFast and what it uses from PayFast's answers |
+| `tests/contract/` | Both sides of the contract: `test_shop_consumer.py` (does the shop keep it?) and `test_payfast_provider.py` (does PayFast keep it?) |
+| `fakes/payfast_sandbox_next.py` | A stand-in for PayFast's real sandbox after its next release: a charge's `id` is now `charge_id` |
+| `shop/payments_no_idempotency.py` | **Defective:** a refactoring dropped the `Idempotency-Key` header |
+| `flaky_examples/` | Two tests that are flaky on purpose: a timing assumption, and an order dependency |
+| `tools/rerun.py` | Runs the same tests N times and counts the outcomes |
+| `ai_generated/` | Two suites an AI assistant wrote for the shop's API (from the code, and from the specs), the script that rebuilds their prompts, and `evaluate.py`, which scores any suite |
+| `shop/payments.py` | One-line fix for pylint's E0606, found by the pipeline's first run (below) |
 
-| Test folder | Level | How the shop runs | Tests |
-|---|---|---|---|
-| `tests/unit/` | unit (the developer's `price_order` tests) | not at all | 8 |
-| `tests/integration/` | integration (Week 10's harness, carried over) | assembled inside the test process | 13 |
-| `tests/system/` | system | **separate process**, HTTP only | 23 |
-| `tests/acceptance/` | acceptance (Gherkin, pytest-bdd; plus `test_browse_products_plain.py` in regular pytest) | **separate process**, HTTP only | 16 |
+`serve.py` gained `--payfast sandbox-next`; `variants.py` gained
+`SHOP_PAYMENTS=no_idempotency`.
 
-A plain `pytest` in this folder reports **60 passed**, in about ten
-seconds: each system and acceptance test starts its own server.
-`pytest -m system` and `pytest -m acceptance` select one level.
-
-## The demos, in the readings' order
+## Week 13: the pipeline
 
 ```bash
-pytest tests/unit tests/integration -q        # 21 passed: the levels below
-pytest tests/system -v                        # 23 passed
-pytest tests/acceptance -v                    # 16 passed
+python pipeline.py --list
+python pipeline.py                       # every stage, about 12 seconds
+python pipeline.py unit integration      # just these
 ```
 
-### Each defect is found at exactly one level
+| Stage | Command (abridged) | Catches |
+|---|---|---|
+| static | `pylint --errors-only shop fakes ...` | code that would crash when run |
+| unit | `pytest tests/unit --cov` | |
+| integration | `pytest tests/integration --cov --cov-append --cov-fail-under=80` | the components disagreeing; too little coverage |
+| contract | `pytest tests/contract` | the shop and PayFast disagreeing |
+| system | `pytest -m system -n auto` | the race (`SHOP_SERVICE=racy`) |
+| acceptance | `pytest -m acceptance -n auto` | the coupon misreading (`SHOP_COUPONS=per_unit`) |
+
+Each defect stops the pipeline at the first stage that can see it:
 
 ```bash
-SHOP_SERVICE=racy pytest tests/unit tests/integration   # 21 passed
-SHOP_SERVICE=racy pytest tests/system                   # 1 failed: the race for the last five mugs
-SHOP_SERVICE=racy pytest tests/acceptance               # 16 passed
-
-SHOP_COUPONS=per_unit pytest tests/unit tests/integration  # 21 passed
-SHOP_COUPONS=per_unit pytest tests/system                  # 23 passed
-SHOP_COUPONS=per_unit pytest tests/acceptance              # 2 failed: 2 mugs with FLAT5; 4 stickers with FLAT5
+SHOP_SERVICE=racy python pipeline.py               # FAILED at system (22/23)
+SHOP_COUPONS=per_unit python pipeline.py           # FAILED at acceptance (14/16)
+SHOP_PAYMENTS=no_idempotency python pipeline.py    # FAILED at contract
 ```
 
-| | unit | integration | system | acceptance |
-|---|---|---|---|---|
-| `SHOP_SERVICE=racy` | pass | pass | **1 failed** | pass |
-| `SHOP_COUPONS=per_unit` | pass | pass | pass | **2 failed** |
+In GitHub, the same stages run on every push and pull request that
+touches this folder: a **fast** job (static to contract, on Python 3.12
+and 3.13) and, only if both pass, a **slow** job (system and
+acceptance). After the workflow reaches the default branch, *Actions →
+Shop pipeline → Run workflow* can run it against one of the defects.
 
-### Finding F1: hostile input crashed the Week 10 shop (System Testing reading)
+### The first pipeline run failed (for a real reason)
+
+```text
+************* Module shop.payments
+shop/payments.py:43:37: E0606: Possibly using variable 'problem' before assignment
+```
+
+With `retries=-1`, `PaymentClient.charge()` raised `UnboundLocalError`
+instead of `PaymentUnavailable`: Week 6's use-before-definition anomaly,
+in the shop since Week 10, found by the first automated static check.
+Fixed in this folder only.
+
+### Parallel tests, and flaky ones
 
 ```bash
-patch -p1 < specs/f1_week10_validation.patch      # back to Week 10's validation
-pytest tests/system/test_robustness_and_security.py   # 2 failed: an HTML 500 page
-patch -R -p1 < specs/f1_week10_validation.patch   # and fixed again
+pytest -m system                    # 23 passed, about 5.5 s
+pytest -m system -n auto            # 23 passed, about 3.9 s (2 CPUs)
+
+python tools/rerun.py 20 flaky_examples/flaky_timing.py                    # e.g. 18/20 passed: FLAKY
+python tools/rerun.py 10 flaky_examples/flaky_timing.py tests/system -n 2  # e.g. 5/10 passed under load
+pytest flaky_examples/flaky_order.py                                       # 2 passed
+pytest flaky_examples/flaky_order.py -k look_the_order_up                  # 1 failed: 404
+pytest flaky_examples/flaky_order.py -n 2                                  # 1 failed: 404
 ```
 
-## Trying the system by hand
+## Week 14: contract testing
 
 ```bash
-python serve.py                    # shop on :8000, fake PayFast on :8001
+pytest tests/contract -v                                              # 7 passed
+
+# The shop breaks the contract; every other test still passes
+SHOP_PAYMENTS=no_idempotency pytest                                   # 3 failed, 64 passed
+#   E  'request 1: header Idempotency-Key: missing'
+
+# PayFast breaks the contract; every other test still passes (they use our fake)
+PAYFAST=sandbox-next pytest tests/contract/test_payfast_provider.py   # 1 failed
+#   E  ['response body.id: missing']
 ```
 
-In a second terminal:
+What PayFast's change would have done in production (second terminal):
 
 ```bash
-curl -s http://127.0.0.1:8000/health                                        # no key needed
-curl -s http://127.0.0.1:8000/products -H 'X-API-Key: shop-key'
-curl -i -X POST http://127.0.0.1:8000/orders -H 'X-API-Key: shop-key' \
-     -H 'Content-Type: application/json' \
-     -d '{"sku": "MUG", "quantity": 2, "customer_email": "ana@example.com", "coupon": "FLAT5"}'
-curl -s -X POST http://127.0.0.1:8001/_test/config -d '{"mode": "decline"}' \
-     -H 'Content-Type: application/json'                                    # misbehave
-curl -s http://127.0.0.1:8001/_test/charges                                 # what was charged
+python serve.py --payfast sandbox-next
+curl -s -X POST localhost:8000/orders -H 'X-API-Key: shop-key' -H 'Content-Type: application/json' \
+     -d '{"sku": "MUG", "quantity": 2, "customer_email": "ana@example.com"}'   # {"error":"internal error"}
+curl -s localhost:8001/_test/charges                                         # ...but the customer was charged
+curl -s localhost:8000/orders/1 -H 'X-API-Key: shop-key'                     # and the order is stuck "pending"
 ```
 
-`python serve.py --db shop.db` keeps the database between runs (stop
-with Ctrl-C, start again: the stock is where you left it). Delete
-`shop.db` afterwards.
+## Week 14: AI-generated tests
+
+```bash
+python ai_generated/build_prompt.py from_code      # the exact prompt behind suite_from_code.py
+python ai_generated/build_prompt.py from_spec      # ... and behind suite_from_spec.py
+
+pytest ai_generated/suite_from_code.py             # 2 failed, 39 passed  <- on the CORRECT shop
+SHOP_COUPONS=per_unit pytest ai_generated/suite_from_code.py   # 41 passed <- on the buggy one
+pytest ai_generated/suite_from_spec.py             # 46 passed
+SHOP_COUPONS=per_unit pytest ai_generated/suite_from_spec.py   # 3 failed
+
+python ai_generated/evaluate.py ai_generated/suite_from_code.py ai_generated/suite_from_spec.py
+python ai_generated/evaluate.py tests              # the human-written suite, for comparison (about 3 min)
+```
+
+| Suite | Tests | Pass on the correct shop | Branch coverage | Known defects caught (of 3) | Mutants killed (of 14) |
+|---|---|---|---|---|---|
+| `tests/unit` | 8 | 8 | 18% | 0 | 2 |
+| `tests/integration` | 13 | 13 | 80% | 0 | 5 |
+| `tests/contract` | 7 | 7 | 21% | 1 (no Idempotency-Key) | 2 |
+| `tests/system` | 23 | 23 | 85% | 1 (racy) | 7 |
+| `tests/acceptance` | 16 | 16 | 82% | 1 (per_unit) | 4 |
+| **all of `tests/`** | 67 | 67 | 92% | **3** | 11 |
+| AI, from the code | 41 | **39** | 94% | **0** | 10 |
+| AI, from the specs | 46 | 46 | 94% | 1 (per_unit) | 12 |
+
+Paste either prompt into any assistant, save its answer in this folder
+as a `.py` file, and score it the same way.
 
 ## Before you leave
 
 ```bash
-git status .                       # nothing modified; no shop.db, no .orig/.rej files
+git status .            # nothing modified; no shop.db, no .coverage; reports/ is ignored
 ```

@@ -1,0 +1,229 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+\newcommand{\dd}{-{}-}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+\title{
+  \textbf{Codebase Change Summary --- Week 14}\\[4pt]
+  \large Advanced Testing, Emerging Techniques, and AI-Assisted Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} since Week 13, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+This document summarizes what was added for Week 14 and explains
+\emph{why} each change exists --- which concept from the Week 14
+reading, \textit{Advanced Testing, Emerging Techniques, and AI-Assisted
+Testing}, it demonstrates. Read it alongside the reading
+(\path{reading_materials/w14_advanced_ai_testing.pdf}) and
+\path{demos/continuous_advanced_testing/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--13 was removed or changed in behavior. Week 14
+adds to Week 13's folder: a consumer-driven contract between the shop
+and PayFast, checked from both sides; two drift scenarios that every
+other test misses; and two AI-generated test suites, kept exactly as
+generated, with a script that measures what each one actually catches.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{6.0cm}L{1.5cm}L{6.9cm}@{}}
+\toprule
+\textbf{File (in \path{demos/continuous_advanced_testing/})} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Contract testing}}\\
+\path{contracts/shop-payfast.json} & New & What the shop sends PayFast,
+and what it uses from PayFast's answers: three interactions. \\
+\path{tests/contract/contract.py} & New & Matching by type, a stub built
+from the contract (about 130 lines, in the style of Pact). \\
+\path{tests/contract/test_shop_consumer.py} & New & Does the shop keep
+the contract? (4 tests) \\
+\path{tests/contract/test_payfast_provider.py} & New & Does a PayFast
+keep it? (3 tests, with provider states) \\
+\path{shop/payments_no_idempotency.py} & New & \textbf{Defective:} no
+\texttt{Idempotency-Key} header (\texttt{SHOP\_PAYMENTS=no\_idempotency}). \\
+\path{fakes/payfast_sandbox_next.py} & New & A stand-in for PayFast's
+real sandbox after its next release: \texttt{id} renamed
+\texttt{charge\_id} (\texttt{PAYFAST=sandbox-next}). \\
+\path{serve.py}, \path{variants.py} & Modified & \texttt{\dd payfast
+sandbox-next}; \texttt{SHOP\_PAYMENTS}. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{AI-assisted testing}}\\
+\path{ai_generated/suite_from_code.py} & New & 41 tests an AI assistant
+wrote from the shop's code (as it stood before Week 11's three amigos). \\
+\path{ai_generated/suite_from_spec.py} & New & 46 tests it wrote from
+the shop's specifications. \\
+\path{ai_generated/build_prompt.py} & New & Prints the exact prompt
+behind each suite. \\
+\path{ai_generated/evaluate.py} & New & Scores any suite: pass rate,
+coverage, known defects caught, mutants killed. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Documentation}}\\
+\path{docs/DEMO_GUIDE_week14_advanced_ai_testing.md} & New &
+Section-by-section lecture companion. \\
+\texttt{README.md} (suite and repository) & Modified & The Week 14
+entry. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ============================================================
+\section{Contract Testing, Runnable}
+% ============================================================
+\begin{lstlisting}[style=shellstyle]
+cd demos/continuous_advanced_testing
+pytest tests/contract -v                                             # 7 passed
+SHOP_PAYMENTS=no_idempotency pytest -q                               # 3 failed, 64 passed
+PAYFAST=sandbox-next pytest tests/contract/test_payfast_provider.py  # 1 failed: id missing
+\end{lstlisting}
+In both drift scenarios, all of Week 11's tests pass: they talk to our
+fake PayFast, which neither requires the header nor renamed the field.
+Against the renamed field, the running shop charges the customer and
+answers ``internal error'', leaving the order \texttt{pending}
+(\texttt{python serve.py \dd payfast sandbox-next}).
+
+% ============================================================
+\section{AI-Generated Tests, Measured}
+% ============================================================
+\begin{lstlisting}[style=shellstyle]
+pytest ai_generated/suite_from_code.py -q                         # 2 failed, 39 passed
+SHOP_COUPONS=per_unit pytest ai_generated/suite_from_code.py -q   # 41 passed
+python ai_generated/evaluate.py ai_generated/suite_from_spec.py
+\end{lstlisting}
+
+\begin{center}
+\small
+\begin{tabular}{@{}lrrrcc@{}}
+\toprule
+\textbf{Suite} & \textbf{Tests} & \textbf{Pass} & \textbf{Coverage} & \textbf{Defects (of 3)} & \textbf{Mutants (of 14)}\\
+\midrule
+all of \path{tests/} (human-written) & 67 & 67 & 92\% & 3 & 11\\
+AI, from the code & 41 & 39 & 94\% & 0 & 10\\
+AI, from the specs & 46 & 46 & 94\% & 1 & 12\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The suite written from the code fails on the correct shop and passes on
+the defective one: it encoded the code's misreading of the coupon
+story. Neither AI suite can see the race or the missing header; the
+specification-based one kills the three mutants the human suite misses.
+Both suites are kept unedited; neither is collected by a plain
+\texttt{pytest} (their names do not start with \texttt{test\_}).
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+Unchanged: \textbf{75 passed, 3 xfailed, 1 failed} from the project
+root; \textbf{67 passed} in \path{demos/continuous_advanced_testing/}.
+The workflow's fast job now also runs the \texttt{contract} stage.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Every technique moves the oracle somewhere: a contract to an agreed
+interface, mutation testing to the original program, AI generation to
+whatever the model is shown. The shop's three known defects needed three
+different kinds of test; no one technique, and no one suite, caught all
+three alone.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Paste \texttt{build\_prompt.py from\_code} into an AI assistant and
+score its answer with \texttt{evaluate.py} (Exercise 3).
+\item Write the three tests that kill the human suite's surviving
+mutants (Exercise 4).
+\item Write a contract for an external service your semester project
+uses, and verify your double against it.
+\end{enumerate}
+
+\end{document}
