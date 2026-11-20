@@ -8,3 +8,5 @@ htmlcov/
 coverage.xml
 coverage.json
 .hypothesis/
+# Week 13: the shop pipeline's JUnit reports and kept server logs
+demo-testing-suite/demos/continuous_advanced_testing/reports/

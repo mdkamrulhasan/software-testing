@@ -1,0 +1,108 @@
+# The Weeks 13-14 demo shop's test pipeline (SE 413/513, Continuous Testing).
+#
+# Runs the stages defined in
+#   demo-testing-suite/demos/continuous_advanced_testing/pipeline.py
+# so that CI and a student's laptop run exactly the same commands.
+#
+#   fast job  (every push and pull request, Python 3.12 and 3.13):
+#             static -> unit -> integration (+ coverage gate) -> contract
+#   slow job  (only if every fast job passed):
+#             system -> acceptance, against the running shop
+#
+# The "Run workflow" button (Actions tab -> Shop pipeline) can run the
+# pipeline against one of the shop's deliberately defective variants, to
+# see which stage catches it. That button appears once this file is on
+# the default branch.
+
+name: Shop pipeline
+
+on:
+  push:
+    paths:
+      - "demo-testing-suite/demos/continuous_advanced_testing/**"
+      - "demo-testing-suite/requirements.txt"
+      - ".github/workflows/shop-pipeline.yml"
+  pull_request:
+    paths:
+      - "demo-testing-suite/demos/continuous_advanced_testing/**"
+      - "demo-testing-suite/requirements.txt"
+      - ".github/workflows/shop-pipeline.yml"
+  workflow_dispatch:
+    inputs:
+      defect:
+        description: "Run against a deliberately defective shop"
+        type: choice
+        options: [none, racy, per_unit, no_idempotency]
+        default: none
+
+# A newer push to the same branch cancels the run it makes obsolete.
+concurrency:
+  group: shop-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Empty unless the workflow was started by hand with a defect chosen;
+  # variants.py reads these (see its docstring).
+  SHOP_SERVICE: ${{ inputs.defect == 'racy' && 'racy' || '' }}
+  SHOP_COUPONS: ${{ inputs.defect == 'per_unit' && 'per_unit' || '' }}
+  SHOP_PAYMENTS: ${{ inputs.defect == 'no_idempotency' && 'no_idempotency' || '' }}
+  DEMO: demo-testing-suite/demos/continuous_advanced_testing
+
+defaults:
+  run:
+    working-directory: demo-testing-suite/demos/continuous_advanced_testing
+
+jobs:
+  fast:
+    name: Fast checks (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false            # report both Python versions, even if one fails
+      matrix:
+        python: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: demo-testing-suite/requirements.txt
+      - name: Install dependencies
+        run: pip install -r ../../requirements.txt
+      - name: "Stages: static, unit, integration, contract"
+        run: python pipeline.py static unit integration contract
+      - name: Keep the test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: fast-reports-python-${{ matrix.python }}
+          path: ${{ env.DEMO }}/reports/
+          retention-days: 14
+
+  slow:
+    name: System and acceptance
+    needs: fast                   # only if every fast job passed
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: demo-testing-suite/requirements.txt
+      - name: Install dependencies
+        run: pip install -r ../../requirements.txt
+      - name: "Stages: system, acceptance"
+        run: python pipeline.py system acceptance
+      - name: Keep the reports and every test's server log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: slow-reports-and-server-logs
+          path: ${{ env.DEMO }}/reports/
+          retention-days: 14

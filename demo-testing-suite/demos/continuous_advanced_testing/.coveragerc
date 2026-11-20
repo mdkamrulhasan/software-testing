@@ -1,0 +1,14 @@
+# Coverage settings for this demo's pipeline (pipeline.py, stages
+# "unit" and "integration"). Measures the shop as shipped: the two
+# deliberately defective variants are not part of it.
+[run]
+branch = True
+source = shop
+omit =
+    shop/service_racy.py
+    shop/pricing_per_unit.py
+    shop/payments_no_idempotency.py
+
+[report]
+show_missing = True
+skip_empty = True
