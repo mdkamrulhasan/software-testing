@@ -1,0 +1,20 @@
+[project]
+name = "se413-513-assignment-4"
+version = "0.1.0"
+description = "SE 413/513 Assignment 4 -- Acceptance Testing (starter code)"
+requires-python = ">=3.9"
+dependencies = ["pytest>=7.4", "flask>=3.0", "requests>=2.31", "pytest-bdd>=9.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+# A strict xfail that unexpectedly passes is reported as a FAILURE.
+xfail_strict = true
+# Gherkin files live next to the tests that run them.
+bdd_features_base_dir = "tests/acceptance/"
+
+markers = [
+    "system: the developer's system tests (provided), checked against SPEC.md",
+    "acceptance: acceptance scenarios, checked against specs/user_stories.md",
+    "operational: operational acceptance checks (start-up, health, restart)",
+]
