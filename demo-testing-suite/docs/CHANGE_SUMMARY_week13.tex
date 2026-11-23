@@ -1,0 +1,246 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{parskip}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% \path{} (from url, loaded by hyperref) prints paths and identifiers
+% verbatim -- so `--` is not turned into a dash -- and may break at / _ - .
+\makeatletter
+\g@addto@macro\UrlBreaks{\do\_\do\-\do\.}
+\makeatother
+\urlstyle{tt}
+\setlength{\emergencystretch}{3em}
+\newcommand{\dd}{-{}-}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{90,100,90}
+\definecolor{codekeyword}{RGB}{0,70,140}
+\definecolor{codestring}{RGB}{150,60,20}
+
+\lstdefinestyle{pythonstyle}{
+  language=Python,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstdefinestyle{shellstyle}{
+  language=bash,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{black!20},
+  columns=fullflexible,
+  keepspaces=true
+}
+\lstset{style=pythonstyle}
+
+\newtcolorbox{keyidea}{
+  colback=blue!5, colframe=blue!50!black,
+  title=Key Idea, fonttitle=\bfseries
+}
+\newtcolorbox{tipbox}{
+  colback=green!5, colframe=green!45!black,
+  title=Tip, fonttitle=\bfseries
+}
+\newtcolorbox{warningbox}{
+  colback=orange!7, colframe=orange!60!black,
+  title=Common Pitfall, fonttitle=\bfseries
+}
+\title{
+  \textbf{Codebase Change Summary --- Week 13}\\[4pt]
+  \large Continuous Testing\\[2pt]
+  \normalsize SE 413/513 --- Software Testing
+}
+\author{Demo Testing Suite}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{What changed in \path{demo-testing-suite/} (and the repository) since Week 11, and why}
+\end{center}
+
+\vspace{0.3cm}
+
+% ============================================================
+\section{Purpose of This Document}
+% ============================================================
+The \path{demo-testing-suite/} codebase is a single, shared project that
+grows one lecture at a time. This document summarizes what was added or
+changed for Week 13 and explains \emph{why} each change exists --- which
+concept from the Week 13 reading, \textit{Continuous Testing: Every
+Change, Every Time}, it demonstrates. Read it alongside the reading
+(\path{reading_materials/w13_continuous_testing.pdf}) and
+\path{demos/continuous_advanced_testing/README.md}.
+
+\begin{keyidea}
+Nothing from Weeks 1--11 was removed or changed in behavior. This week
+adds one self-contained project, shared with Week 14: Week 11's shop
+plus a \emph{pipeline} that runs every test level in order, cheapest
+first, on a laptop and --- through a GitHub Actions workflow --- on
+every push. The pipeline's first run found a real, latent defect.
+\end{keyidea}
+
+% ============================================================
+\section{What Changed At a Glance}
+% ============================================================
+\begin{center}
+\small
+\begin{tabular}{@{}L{6.0cm}L{1.5cm}L{6.9cm}@{}}
+\toprule
+\textbf{File} & \textbf{Status} & \textbf{Purpose} \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{The reading's project (not in the default run)}}\\
+\path{demos/continuous_advanced_testing/} & New (copy) & Week 11's shop
+and its 60 tests, copied; Week 11's folder is unchanged. \\
+\path{pipeline.py} & New & The pipeline: \texttt{static},
+\texttt{unit}, \texttt{integration} (80\% coverage gate),
+\texttt{contract}, \texttt{system}, \texttt{acceptance}; stops at the
+first failure; writes JUnit reports and keeps server logs. \\
+\path{.coveragerc} & New & Coverage of \path{shop/} only, without the
+defective variants; also measures the server processes. \\
+\path{shop/payments.py} & Fixed & One line: pylint's E0606, found by the
+pipeline's first run (Section~\ref{sec:finding}). \\
+\path{flaky_examples/} & New & Two tests that are flaky on purpose: a
+timing assumption and an order dependency. \\
+\path{tools/rerun.py} & New & Runs the same tests N times and counts
+the outcomes. \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Repository, tooling, and documentation}}\\
+\path{.github/workflows/shop-pipeline.yml} & New & The pipeline in
+GitHub Actions: a fast job on Python 3.12 and 3.13, then a slow job;
+artifacts; a \emph{Run workflow} button with a choice of defect. \\
+\path{.gitignore} & Modified & Ignores the pipeline's \path{reports/}. \\
+\texttt{pytest.ini} & Modified & Registers the \texttt{contract} marker
+(Week 14). \\
+\path{docs/DEMO_GUIDE_week13_continuous_testing.md} & New &
+Section-by-section lecture companion. \\
+\texttt{README.md} (suite and repository) & Modified & Layout and the
+Week 13 entry. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{tipbox}
+No new dependencies: \texttt{pylint}, \texttt{pytest-cov}, and
+\texttt{pytest-xdist} were added in Weeks 5--7. If your environment is
+older than that, reinstall:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pip install -r requirements.txt
+\end{lstlisting}
+\end{tipbox}
+
+% ============================================================
+\section{The Pipeline, Runnable}
+% ============================================================
+\textbf{Location:} \path{demos/continuous_advanced_testing/}. \textbf{Run
+its commands from inside the folder:}
+\begin{lstlisting}[style=shellstyle]
+cd demos/continuous_advanced_testing
+pytest                         # 67 passed (Week 11's 60, plus 7 contract tests)
+python pipeline.py --list      # the six stages
+python pipeline.py             # all six pass, about 12 seconds
+\end{lstlisting}
+
+Each defective variant stops the pipeline at the first stage that can
+see it:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Variant} & \textbf{Stops at} & \textbf{Result there}\\
+\midrule
+\texttt{SHOP\_SERVICE=racy} & system & 22/23 passed\\
+\texttt{SHOP\_COUPONS=per\_unit} & acceptance & 14/16 passed\\
+\texttt{SHOP\_PAYMENTS=no\_idempotency} (Week 14) & contract & 4/7 passed\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+In GitHub the same stages run on every push and pull request that
+touches the folder (about 50 seconds); once the workflow is on the
+default branch, \emph{Actions $\rightarrow$ Shop pipeline $\rightarrow$
+Run workflow} can run it against one of the defects.
+
+% ============================================================
+\section{A Real Finding: Use Before Definition}
+\label{sec:finding}
+% ============================================================
+The pipeline's first stage runs \texttt{pylint \dd errors-only}. On its
+first run it stopped at:
+\begin{lstlisting}[style=shellstyle]
+shop/payments.py:43:37: E0606: Possibly using variable 'problem' before assignment
+\end{lstlisting}
+With \texttt{retries=-1}, the payment client's \texttt{charge()} raised
+\texttt{UnboundLocalError} instead of \texttt{PaymentUnavailable}: Week
+6's use-before-definition anomaly, in the shop since Week 10, missed by
+every test. It is fixed (one line) in the new folder only; Weeks 10 and
+11's folders are left as their readings printed them.
+
+% ============================================================
+\section{Updated: Expected Test Results}
+% ============================================================
+From the project root:
+\begin{lstlisting}[style=shellstyle]
+cd demo-testing-suite
+pytest -v
+\end{lstlisting}
+you should still see \textbf{75 passed, 3 xfailed, 1 failed}, exactly
+Week 11's result. The new folder is not part of that run
+(\texttt{pytest.ini} sets \texttt{testpaths = tests}), and the workflow
+runs only the new folder: the main suite's deliberately failing test
+would otherwise make every run red.
+
+% ============================================================
+\section{How This Connects to the Reading}
+% ============================================================
+\begin{keyidea}
+Weeks 2--11 built tests at every level. Week 13 makes them run on every
+change, in order of cost, on a clean machine, with gates and evidence
+--- because a test that is not run finds nothing.
+\end{keyidea}
+
+% ============================================================
+\section{Suggested Next Steps}
+% ============================================================
+\begin{enumerate}
+\item Run \texttt{pipeline.py} against each defective variant, and
+\emph{predict} the failing stage first.
+\item Open the workflow file and a run in the \emph{Actions} tab side by
+side.
+\item Fix both flaky examples (Exercises 3 and 4), and prove it with
+\path{tools/rerun.py}.
+\item Add a pipeline to your semester project, and make it fail on
+purpose at every stage.
+\end{enumerate}
+
+\end{document}

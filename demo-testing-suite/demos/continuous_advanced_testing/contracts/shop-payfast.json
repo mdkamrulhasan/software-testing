@@ -1,0 +1,49 @@
+{
+  "consumer": "shop",
+  "provider": "PayFast",
+  "basedOn": "specs/payment_provider_api.md (PayFast Charges API, v2)",
+  "matching": "by type: every header and field listed here must be present, with a value of the same JSON type; extra headers and fields are allowed",
+  "interactions": [
+    {
+      "description": "a charge for a card that is accepted",
+      "providerState": "the card will be accepted",
+      "request": {
+        "method": "POST",
+        "path": "/v1/charges",
+        "headers": {"Authorization": "Bearer sk_test_123", "Idempotency-Key": "order-1"},
+        "body": {"amount": 2500, "currency": "USD", "reference": "order-1"}
+      },
+      "response": {
+        "status": 201,
+        "body": {"id": "ch_1"}
+      }
+    },
+    {
+      "description": "a charge for a card that is declined",
+      "providerState": "the card will be declined",
+      "request": {
+        "method": "POST",
+        "path": "/v1/charges",
+        "headers": {"Authorization": "Bearer sk_test_123", "Idempotency-Key": "order-1"},
+        "body": {"amount": 2500, "currency": "USD", "reference": "order-1"}
+      },
+      "response": {
+        "status": 402,
+        "body": {"error": "card_declined"}
+      }
+    },
+    {
+      "description": "a charge while PayFast is unavailable",
+      "providerState": "PayFast is unavailable",
+      "request": {
+        "method": "POST",
+        "path": "/v1/charges",
+        "headers": {"Authorization": "Bearer sk_test_123", "Idempotency-Key": "order-1"},
+        "body": {"amount": 2500, "currency": "USD", "reference": "order-1"}
+      },
+      "response": {
+        "status": 503
+      }
+    }
+  ]
+}

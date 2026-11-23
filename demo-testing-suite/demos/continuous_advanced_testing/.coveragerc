@@ -1,0 +1,19 @@
+# Coverage settings for this demo (pipeline.py's coverage gate, and
+# ai_generated/evaluate.py). Measures the shop as shipped: the
+# deliberately defective variants are not part of it.
+[run]
+branch = True
+# Also measure the shop inside the server processes that the system and
+# acceptance tests start (coverage 7.10+), and save their data when the
+# harness stops them with SIGTERM.
+patch = subprocess
+sigterm = True
+source = shop
+omit =
+    shop/service_racy.py
+    shop/pricing_per_unit.py
+    shop/payments_no_idempotency.py
+
+[report]
+show_missing = True
+skip_empty = True

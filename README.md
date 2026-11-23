@@ -115,6 +115,22 @@ The organization and contents of the repository may evolve throughout the semest
 
 The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python project that grows each week alongside the readings. Each week's changes are summarized in a student-facing PDF under [`demo-testing-suite/docs/`](demo-testing-suite/docs/).
 
+### Week 14 (Nov. 30): Advanced Testing, Emerging Techniques, and AI-Assisted Testing
+
+- **Reading:** [`w14_advanced_ai_testing.pdf`](reading_materials/w14_advanced_ai_testing.pdf) (student edition; the code it summarizes is in the demo folder below)
+- **What changed:** [`CHANGE_SUMMARY_week14.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week14.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week14_advanced_ai_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week14_advanced_ai_testing.md)
+- **Reading's examples, runnable:** [`demo-testing-suite/demos/continuous_advanced_testing/`](demo-testing-suite/demos/continuous_advanced_testing/): a consumer-driven contract between the shop and its payment provider, checked from both sides, with two drift scenarios every other test misses; and two AI-generated test suites (from the code, and from the specifications), kept as generated, with a script that measures what each one catches (run from inside that folder)
+
+### Week 13 (Nov. 23): Continuous Testing
+
+- **Reading:** [`w13_continuous_testing.pdf`](reading_materials/w13_continuous_testing.pdf) (student edition; the code it summarizes is in the demo folder below)
+- **What changed:** [`CHANGE_SUMMARY_week13.pdf`](demo-testing-suite/docs/CHANGE_SUMMARY_week13.pdf)
+- **Demo guide:** [`DEMO_GUIDE_week13_continuous_testing.md`](demo-testing-suite/docs/DEMO_GUIDE_week13_continuous_testing.md)
+- **Reading's examples, runnable:** [`demo-testing-suite/demos/continuous_advanced_testing/`](demo-testing-suite/demos/continuous_advanced_testing/): Week 11's shop with a pipeline (`pipeline.py`) that runs static analysis, unit, integration (with a coverage gate), contract, system, and acceptance tests in order, cheapest first; two deliberately flaky tests and a rerun tool (run from inside that folder)
+- **Continuous integration:** [`.github/workflows/shop-pipeline.yml`](.github/workflows/shop-pipeline.yml) runs the same pipeline in GitHub Actions on every push and pull request that touches the demo (see the *Actions* tab)
+- **New tooling:** none (`pylint`, `pytest-cov`, and `pytest-xdist` were added in Weeks 5–7)
+
 ### Week 11 (Nov. 9): System Testing and Acceptance Testing
 
 - **Readings:** [`w11.1_system_testing.pdf`](reading_materials/w11.1_system_testing.pdf), [`w11.2_acceptance_testing.pdf`](reading_materials/w11.2_acceptance_testing.pdf) (student editions; the code they summarize is in the demo folder below)
@@ -169,6 +185,8 @@ The [`demo-testing-suite/`](demo-testing-suite/) folder is a single Python proje
 
 | Week | Change summary | Demo guide |
 |---|---|---|
+| 14 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week14.pdf) | [Advanced & AI-assisted testing](demo-testing-suite/docs/DEMO_GUIDE_week14_advanced_ai_testing.md) |
+| 13 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week13.pdf) | [Continuous testing](demo-testing-suite/docs/DEMO_GUIDE_week13_continuous_testing.md) |
 | 11 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week11.pdf) | [System & acceptance testing](demo-testing-suite/docs/DEMO_GUIDE_week11_system_acceptance_testing.md) |
 | 10 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week10.pdf) | [Integration testing](demo-testing-suite/docs/DEMO_GUIDE_week10_integration_testing.md) |
 | 8–9 | [PDF](demo-testing-suite/docs/CHANGE_SUMMARY_week08.pdf) | [Functional testing](demo-testing-suite/docs/DEMO_GUIDE_week08_functional_testing.md) |
